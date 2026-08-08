@@ -8,197 +8,262 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --bg:#fbf7ef;
-    --bg2:#fffaf3;
-    --card:#fffdf9;
-    --text:#3e3a35;
-    --muted:#776d63;
-    --line:#eadfcd;
-    --rose:#dca9b4;
-    --rose2:#e7c1c8;
-    --gold:#c9a45a;
-    --sage:#8da48e;
-    --shadow:0 18px 50px rgba(122,95,62,.10);
+    --ink:#1c2b22;
+    --ink-soft:#33463a;
+    --ivory:#f7f1e3;
+    --ivory-deep:#efe6cd;
+    --card:#fffdf7;
+    --gold:#a97b34;
+    --gold-soft:#d8b877;
+    --gold-line:rgba(169,123,52,.45);
+    --blush:#c69b93;
+    --line:#e2d5b3;
+    --muted:#6c6152;
+    --shadow:0 26px 60px rgba(28,43,34,.14);
+    --shadow-sm:0 10px 26px rgba(28,43,34,.08);
   }
+  *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{
     font-family:'Inter',sans-serif;
-    color:var(--text);
+    color:var(--ink);
     background:
-      radial-gradient(circle at top left, rgba(231,193,200,.34), transparent 28%),
-      radial-gradient(circle at top right, rgba(201,164,90,.14), transparent 24%),
-      linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+      repeating-linear-gradient(115deg, rgba(169,123,52,.035) 0px, rgba(169,123,52,.035) 1px, transparent 1px, transparent 64px),
+      radial-gradient(circle at 12% 0%, rgba(198,155,147,.20), transparent 32%),
+      radial-gradient(circle at 90% 8%, rgba(169,123,52,.16), transparent 30%),
+      linear-gradient(180deg, var(--ivory) 0%, var(--ivory-deep) 100%);
+    -webkit-font-smoothing:antialiased;
   }
   .serif{font-family:'Playfair Display',serif}
-  .nav-blur{backdrop-filter:blur(10px); background:rgba(251,247,239,.84)}
+  .script{font-family:'Cormorant Garamond',serif; font-style:italic}
+  :focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:.4rem}
+
+  .nav-blur{backdrop-filter:blur(14px); background:rgba(247,241,227,.86); border-bottom:1px solid var(--gold-line)}
+  .nav-link{position:relative; color:var(--ink-soft)}
+  .nav-link::after{content:"";position:absolute;left:1rem;right:1rem;bottom:.35rem;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:center;transition:transform .28s ease}
+  .nav-link.active{color:var(--ink)}
+  .nav-link.active::after{transform:scaleX(1)}
+
   .soft-card{
-    background:rgba(255,253,249,.9);
-    border:1px solid rgba(234,223,205,.95);
+    background:linear-gradient(180deg, rgba(255,253,247,.98), rgba(255,253,247,.92));
+    border:1px solid var(--line);
     box-shadow:var(--shadow);
+    position:relative;
   }
-  .pill{
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.76);
+  .soft-card::before{
+    content:"";position:absolute;inset:9px;border:1px solid rgba(169,123,52,.22);
+    border-radius:inherit;pointer-events:none;
   }
-  .gold-line{
-    height:1px;
-    background:linear-gradient(90deg, transparent, rgba(201,164,90,.7), transparent);
-  }
+  .pill{border:1px solid var(--line); background:rgba(255,255,255,.7)}
+
   .btn-primary{
-    background:linear-gradient(135deg, var(--rose2) 0%, var(--rose) 100%);
-    color:white;
-    box-shadow:0 10px 24px rgba(220,169,180,.35);
-    transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    background:linear-gradient(135deg,#c99a5b 0%, var(--gold) 60%, #8f652a 100%);
+    color:#fffaf0;
+    box-shadow:0 14px 30px rgba(169,123,52,.32);
+    transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    letter-spacing:.02em;
   }
-  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 14px 28px rgba(220,169,180,.42)}
-  .btn-ghost{
-    background:rgba(255,255,255,.8);
-    border:1px solid var(--line);
-    transition:background .2s ease, transform .2s ease;
-  }
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 18px 34px rgba(169,123,52,.4); filter:brightness(1.03)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-ghost{background:rgba(255,255,255,.75); border:1px solid var(--line); transition:background .2s ease, transform .2s ease}
   .btn-ghost:hover{background:#fff; transform:translateY(-1px)}
-  .rule{display:flex; align-items:center; gap:.8rem; justify-content:center; margin:1rem 0}
-  .rule span{flex:1; height:1px; background:linear-gradient(90deg, transparent, rgba(201,164,90,.55), transparent)}
-  .rule i{color:var(--gold); font-style:normal; font-size:1.1rem}
-  .field label{display:block; font-weight:600; margin-bottom:.45rem}
+
+  .rule{display:flex; align-items:center; gap:.9rem; justify-content:center}
+  .rule span{flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--gold-line), transparent)}
+
+  .section-title{text-transform:uppercase; letter-spacing:.26em; font-size:.72rem; color:var(--gold); font-weight:700}
+
+  .field label{display:block; font-weight:600; margin-bottom:.4rem; font-size:.92rem}
+  .field .required{color:var(--blush); margin-left:.15rem}
   .field input,.field select,.field textarea{
-    width:100%;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.9);
-    border-radius:1rem;
-    padding:.9rem 1rem;
-    outline:none;
-    transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    width:100%; border:1px solid var(--line); background:rgba(255,255,255,.92);
+    border-radius:.9rem; padding:.85rem 1rem; outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease;
   }
   .field input:focus,.field select:focus,.field textarea:focus{
-    border-color:rgba(201,164,90,.8);
-    box-shadow:0 0 0 4px rgba(201,164,90,.12);
+    border-color:var(--gold); box-shadow:0 0 0 4px rgba(169,123,52,.13);
   }
-  .field textarea{min-height:120px; resize:vertical}
-  .hint{display:block; color:var(--muted); font-size:.84rem; margin-top:.45rem}
-  .radio-row{display:flex; gap:.7rem; flex-wrap:wrap}
-  .radio-row label{
-    display:flex; align-items:center; gap:.55rem;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.78);
-    padding:.75rem 1rem;
-    border-radius:999px;
-    cursor:pointer;
-    transition:transform .2s ease, background .2s ease, border-color .2s ease;
+  .field textarea{min-height:110px; resize:vertical}
+  .hint{display:block; color:var(--muted); font-size:.82rem; margin-top:.4rem}
+  .field.invalid input{border-color:#b5544f; box-shadow:0 0 0 4px rgba(181,84,79,.12)}
+  .err-msg{display:none; color:#a13f3a; font-size:.8rem; margin-top:.4rem}
+  .field.invalid .err-msg{display:block}
+
+  .radio-row{display:flex; gap:.6rem; flex-wrap:wrap}
+  .radio-row input{position:absolute; opacity:0; width:0; height:0}
+  .radio-row .opt{
+    display:flex; align-items:center; gap:.5rem; border:1px solid var(--line);
+    background:rgba(255,255,255,.75); padding:.7rem 1.1rem; border-radius:999px;
+    cursor:pointer; transition:transform .18s ease, background .2s ease, border-color .2s ease, color .2s ease;
+    font-weight:600; font-size:.92rem; color:var(--ink-soft);
   }
-  .radio-row label:hover{transform:translateY(-1px)}
-  .radio-row input{accent-color:var(--gold)}
-  .table-scroll{overflow-x:auto; border-radius:1.5rem; border:1px solid var(--line); background:rgba(255,255,255,.72); box-shadow:var(--shadow)}
-  table{width:100%; border-collapse:collapse; min-width:860px}
-  caption{caption-side:top; text-align:left; padding:1rem 1.25rem; font-weight:600; color:var(--muted)}
-  th,td{padding:1rem 1.25rem; border-top:1px solid rgba(234,223,205,.75); text-align:left; vertical-align:top}
-  th{font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; color:#7a6d61; background:rgba(255,250,243,.9)}
-  .tag{display:inline-flex; align-items:center; justify-content:center; padding:.35rem .75rem; border-radius:999px; font-size:.8rem; font-weight:600}
-  .tag.yes{background:rgba(141,164,142,.16); color:#577359}
-  .tag.no{background:rgba(220,169,180,.18); color:#a15f6d}
-  .tag.maybe{background:rgba(201,164,90,.16); color:#8b6a22}
-  .confirmation{display:none; margin-top:1.25rem; padding:1rem 1.15rem; border-radius:1.25rem; background:linear-gradient(135deg, rgba(141,164,142,.14), rgba(255,255,255,.85)); border:1px solid rgba(141,164,142,.26)}
-  .confirmation.show{display:block}
-  .fade-in{animation:fadeIn .65s ease both}
-  @keyframes fadeIn{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)}}
+  .radio-row .opt:hover{transform:translateY(-1px)}
+  .radio-row input:checked + .opt{background:var(--ink); border-color:var(--ink); color:#f6efdd}
+  .radio-row input:focus-visible + .opt{outline:2px solid var(--gold); outline-offset:2px}
+
+  .stepper{display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px; background:#fff; overflow:hidden}
+  .stepper button{width:2.5rem; height:2.5rem; display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:var(--gold); transition:background .15s ease}
+  .stepper button:hover{background:rgba(169,123,52,.08)}
+  .stepper span{min-width:2.5rem; text-align:center; font-weight:700}
+
+  .confirmation{display:none; margin-top:1.25rem; padding:1.25rem 1.35rem; border-radius:1.25rem; background:linear-gradient(135deg, rgba(89,124,96,.12), rgba(255,255,255,.9)); border:1px solid rgba(89,124,96,.28)}
+  .confirmation.show{display:flex}
+
+  .fade-up{opacity:0; transform:translateY(16px); animation:fadeUp .7s ease forwards}
+  @keyframes fadeUp{to{opacity:1; transform:translateY(0)}}
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1; transform:translateY(0)}
+
+  .crest-ring{stroke-dasharray:4 6}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .fade-up,.reveal{animation:none !important; transition:none !important; opacity:1 !important; transform:none !important}
+    * { animation-duration:.001ms !important; transition-duration:.001ms !important }
+  }
+
+  .stat{border:1px solid var(--line); background:rgba(255,255,255,.78); border-radius:1.1rem; padding:1.1rem 1.3rem}
+  .stat b{display:block; font-family:'Playfair Display',serif; font-size:1.9rem; line-height:1}
+
+  .table-scroll{overflow-x:auto; border-radius:1.4rem; border:1px solid var(--line); background:rgba(255,255,255,.75); box-shadow:var(--shadow-sm)}
+  table{width:100%; border-collapse:collapse; min-width:760px}
+  caption{caption-side:top; text-align:left; padding:1rem 1.25rem; font-weight:600; color:var(--muted); font-size:.9rem}
+  th,td{padding:.9rem 1.25rem; border-top:1px solid rgba(226,213,179,.75); text-align:left; vertical-align:top; font-size:.94rem}
+  th{font-size:.74rem; text-transform:uppercase; letter-spacing:.09em; color:var(--gold); background:rgba(255,250,238,.9)}
+  .tag{display:inline-flex; align-items:center; gap:.35rem; padding:.32rem .75rem; border-radius:999px; font-size:.78rem; font-weight:700}
+  .tag.yes{background:rgba(89,124,96,.14); color:#3f6146}
+  .tag.no{background:rgba(198,155,147,.22); color:#8a4f47}
+  .tag.maybe{background:rgba(169,123,52,.16); color:#845c1f}
+
+  @media (max-width:700px){
+    table.guests, table.guests thead, table.guests tbody, table.guests th, table.guests td, table.guests tr{display:block}
+    table.guests thead{position:absolute; left:-9999px; top:-9999px}
+    table.guests tr{border:1px solid var(--line); border-radius:1rem; margin:0 1rem 1rem; padding:.5rem .25rem; background:#fff}
+    table.guests tr:last-child{margin-bottom:1.25rem}
+    table.guests td{border-top:none; padding:.5rem 1rem .5rem 44%; position:relative; min-height:1.6rem}
+    table.guests td::before{content:attr(data-label); position:absolute; left:1rem; width:40%; font-weight:700; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+  }
+
+  .countdown-box{background:var(--ink); color:#f6efdd; border-radius:1.1rem; padding:.9rem 1.1rem; min-width:5.4rem}
+  .countdown-box b{display:block; font-family:'Playfair Display',serif; font-size:1.7rem; line-height:1}
+  .countdown-box span{font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-soft)}
+
   .print-only{display:none}
-  .section-title{
-    text-transform:uppercase;
-    letter-spacing:.22em;
-    font-size:.75rem;
-    color:#8b6f49;
-    font-weight:700;
-  }
   @media print{
     .no-print,.nav,.footer,.form,.confirmation{display:none !important}
     body{background:#fff}
     .print-only{display:block}
-    .soft-card{box-shadow:none}
-    .table-scroll{box-shadow:none}
+    .soft-card,.table-scroll{box-shadow:none}
   }
 </style>
 </head>
 <body>
-<header class="nav nav-blur sticky top-0 z-50 border-b border-[#eadfcd]">
+
+<header class="nav nav-blur sticky top-0 z-50">
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <div class="flex items-center justify-between h-20 gap-4">
       <div class="flex items-center gap-3">
-        <div class="h-11 w-11 rounded-full border border-[rgba(201,164,90,.45)] bg-white flex items-center justify-center shadow-sm">
-          <span class="serif text-xl text-[#c9a45a]">C &amp; N</span>
-        </div>
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">
+          <circle cx="23" cy="23" r="21" fill="#fffdf7" stroke="var(--gold)" stroke-width="1.1"/>
+          <circle class="crest-ring" cx="23" cy="23" r="17.5" fill="none" stroke="var(--gold-soft)" stroke-width="1"/>
+          <text x="23" y="28" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="13" fill="var(--ink)">C&amp;N</text>
+        </svg>
         <div>
           <p class="serif text-lg sm:text-xl font-bold tracking-wide">Catherine &amp; Niyi</p>
-          <p class="text-xs sm:text-sm text-[#776d63]">27 March 2027</p>
+          <p class="text-xs sm:text-sm text-[var(--muted)]">27 March 2027</p>
         </div>
       </div>
-      <nav class="hidden md:flex items-center gap-2">
-        <button onclick="showSection('home')" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/80 transition">Home</button>
-        <button onclick="showSection('rsvp')" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/80 transition">RSVP Registration</button>
-        <button onclick="showSection('guest')" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/80 transition">Guest List</button>
-        <button onclick="showSection('contact')" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/80 transition">Contact</button>
+      <nav class="hidden md:flex items-center gap-1" id="navDesktop">
+        <button data-target="home" class="nav-link px-4 py-2 rounded-full text-sm font-medium hover:bg-white/70 transition">Home</button>
+        <button data-target="rsvp" class="nav-link px-4 py-2 rounded-full text-sm font-medium hover:bg-white/70 transition">RSVP Registration</button>
+        <button data-target="guest" class="nav-link px-4 py-2 rounded-full text-sm font-medium hover:bg-white/70 transition">Guest List</button>
+        <button data-target="contact" class="nav-link px-4 py-2 rounded-full text-sm font-medium hover:bg-white/70 transition">Contact</button>
       </nav>
-      <button class="md:hidden btn-ghost px-4 py-2 rounded-full text-sm font-semibold" onclick="toggleMobileMenu()">Menu</button>
+      <button class="md:hidden btn-ghost px-4 py-2 rounded-full text-sm font-semibold" onclick="toggleMobileMenu()" aria-expanded="false" aria-controls="mobileMenu">Menu</button>
     </div>
     <div id="mobileMenu" class="md:hidden hidden pb-4">
-      <div class="soft-card rounded-2xl p-3 flex flex-col gap-2">
-        <button onclick="showSection('home');toggleMobileMenu()" class="text-left px-4 py-3 rounded-xl hover:bg-white transition">Home</button>
-        <button onclick="showSection('rsvp');toggleMobileMenu()" class="text-left px-4 py-3 rounded-xl hover:bg-white transition">RSVP Registration</button>
-        <button onclick="showSection('guest');toggleMobileMenu()" class="text-left px-4 py-3 rounded-xl hover:bg-white transition">Guest List</button>
-        <button onclick="showSection('contact');toggleMobileMenu()" class="text-left px-4 py-3 rounded-xl hover:bg-white transition">Contact</button>
+      <div class="soft-card rounded-2xl p-3 flex flex-col gap-1">
+        <button data-target="home" class="nav-link text-left px-4 py-3 rounded-xl hover:bg-white transition">Home</button>
+        <button data-target="rsvp" class="nav-link text-left px-4 py-3 rounded-xl hover:bg-white transition">RSVP Registration</button>
+        <button data-target="guest" class="nav-link text-left px-4 py-3 rounded-xl hover:bg-white transition">Guest List</button>
+        <button data-target="contact" class="nav-link text-left px-4 py-3 rounded-xl hover:bg-white transition">Contact</button>
       </div>
     </div>
   </div>
 </header>
 
-<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-  <section id="home" class="page-section hero text-center py-8 sm:py-14 fade-in">
-    <p class="uppercase tracking-[0.28em] text-xs sm:text-sm text-[#8b6f49]">Save the date</p>
-    <h1 class="serif text-4xl sm:text-5xl lg:text-6xl mt-4">Catherine &amp; Niyi</h1>
-    <p class="mt-4 text-base sm:text-lg text-[#5f5750]">We are delighted to invite you to celebrate our wedding day.</p>
-    <div class="rule max-w-md mx-auto"><span></span><i>&#10047;</i><span></span></div>
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
+
+  <!-- HOME -->
+  <section id="home" class="page-section text-center py-6 sm:py-10">
+    <div class="fade-up" style="animation-delay:.05s">
+      <svg width="88" height="88" viewBox="0 0 88 88" class="mx-auto mb-6" aria-hidden="true">
+        <circle cx="44" cy="44" r="41" fill="none" stroke="var(--gold)" stroke-width="1.2"/>
+        <circle cx="44" cy="44" r="33" fill="none" stroke="var(--gold-soft)" stroke-width="1" stroke-dasharray="3 6"/>
+        <text x="44" y="52" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="26" fill="var(--ink)">C &amp; N</text>
+      </svg>
+    </div>
+    <p class="section-title fade-up" style="animation-delay:.1s">Save the date</p>
+    <h1 class="serif text-4xl sm:text-6xl mt-4 fade-up" style="animation-delay:.18s">Catherine &amp; Niyi</h1>
+    <p class="mt-4 text-base sm:text-lg text-[var(--ink-soft)] script fade-up" style="animation-delay:.26s">are joyfully getting married</p>
+
+    <div class="rule max-w-md mx-auto my-7 fade-up" style="animation-delay:.32s"><span></span><span class="text-[var(--gold)]">&#10047;</span><span></span></div>
+
+    <div class="flex justify-center gap-3 sm:gap-4 flex-wrap fade-up" style="animation-delay:.38s" id="countdown" aria-live="polite">
+      <div class="countdown-box"><b id="cdDays">–</b><span>Days</span></div>
+      <div class="countdown-box"><b id="cdHours">–</b><span>Hours</span></div>
+      <div class="countdown-box"><b id="cdMins">–</b><span>Minutes</span></div>
+      <div class="countdown-box"><b id="cdSecs">–</b><span>Seconds</span></div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 fade-up" style="animation-delay:.44s">
       <div class="pill px-5 py-3 rounded-full text-sm font-semibold">Saturday, 27 March 2027</div>
       <div class="pill px-5 py-3 rounded-full text-sm font-semibold">RSVP by 1 February 2027</div>
-      <div class="pill px-5 py-3 rounded-full text-sm font-semibold">Love • Joy • Celebration</div>
+      <button data-target="rsvp" class="btn-primary px-6 py-3 rounded-full text-sm font-semibold">Register your RSVP</button>
     </div>
-    <div class="mt-8 soft-card rounded-[2rem] p-6 sm:p-8 max-w-3xl mx-auto">
-      <p class="section-title">Save the date</p>
-      <h2 class="serif text-2xl sm:text-3xl mt-3">A beautiful day is coming</h2>
-      <p class="mt-4 text-[#5f5750] leading-7">Join us as we begin our next chapter surrounded by family and friends. Please use the navigation above to register your RSVP, view the guest list, or contact us.</p>
-      <div class="mt-6 grid sm:grid-cols-3 gap-4 text-left">
+
+    <div class="mt-10 soft-card rounded-[2rem] p-6 sm:p-10 max-w-3xl mx-auto text-left reveal">
+      <p class="section-title text-center">Save the date</p>
+      <h2 class="serif text-2xl sm:text-3xl mt-3 text-center">A beautiful day is coming</h2>
+      <p class="mt-4 text-[var(--ink-soft)] leading-7 text-center">Join us as we begin our next chapter, surrounded by family and friends. Use the menu above to register your RSVP, view the guest list, or reach out with any questions.</p>
+      <div class="mt-7 grid sm:grid-cols-3 gap-4">
         <div class="pill rounded-2xl p-4">
-          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Date</p>
-          <p class="mt-2 font-semibold">27 March 2027</p>
+          <p class="text-xs uppercase tracking-[0.2em] text-[var(--gold)] font-semibold">Date</p>
+          <p class="mt-2 font-semibold serif text-lg">27 March 2027</p>
         </div>
         <div class="pill rounded-2xl p-4">
-          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Venue</p>
+          <p class="text-xs uppercase tracking-[0.2em] text-[var(--gold)] font-semibold">Venue</p>
           <p class="mt-2 font-semibold">Ceremony &amp; reception details to follow</p>
         </div>
         <div class="pill rounded-2xl p-4">
-          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Dress code</p>
+          <p class="text-xs uppercase tracking-[0.2em] text-[var(--gold)] font-semibold">Dress code</p>
           <p class="mt-2 font-semibold">Elegant celebration attire</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="rsvp" class="page-section grid lg:grid-cols-2 gap-8 items-start hidden">
-    <div id="rsvpCard" class="soft-card rounded-[2rem] p-6 sm:p-8 fade-in">
+  <!-- RSVP -->
+  <section id="rsvp" class="page-section hidden">
+    <div class="soft-card rounded-[2rem] p-6 sm:p-10 max-w-2xl mx-auto reveal">
       <p class="section-title">RSVP Registration</p>
-      <h2 class="serif text-3xl mt-2">Let us know you’re coming</h2>
-      <form class="form mt-6" id="rsvpForm">
-        <div class="field mb-5">
-          <label for="name">Guest name</label>
+      <h2 class="serif text-3xl mt-2">Let us know you're coming</h2>
+      <p class="mt-2 text-sm text-[var(--muted)]">Please reply by 1 February 2027.</p>
+
+      <form class="form mt-7" id="rsvpForm" novalidate>
+        <div class="field mb-5" id="fld-name">
+          <label for="name">Guest name<span class="required">*</span></label>
           <input id="name" name="name" type="text" placeholder="Chidinma Eze" required />
+          <span class="err-msg">Please enter your name.</span>
         </div>
 
         <div class="grid sm:grid-cols-2 gap-5">
-          <div class="field">
-            <label for="email">Email</label>
+          <div class="field" id="fld-email">
+            <label for="email">Email<span class="required">*</span></label>
             <input id="email" name="email" type="email" placeholder="chidinma.eze@example.com" required />
+            <span class="err-msg">Please enter a valid email.</span>
           </div>
           <div class="field">
             <label for="phone">Phone</label>
@@ -208,19 +273,22 @@
 
         <div class="field mt-5">
           <label>Will you attend?</label>
-          <div class="radio-row">
-            <label><input type="radio" name="attending" value="yes" checked /><span>Yes</span></label>
-            <label><input type="radio" name="attending" value="no" /><span>No</span></label>
-            <label><input type="radio" name="attending" value="maybe" /><span>Maybe</span></label>
+          <div class="radio-row" role="radiogroup" aria-label="Will you attend?">
+            <label><input type="radio" name="attending" value="yes" checked /><span class="opt">✓ Joyfully yes</span></label>
+            <label><input type="radio" name="attending" value="no" /><span class="opt">✕ Regretfully no</span></label>
+            <label><input type="radio" name="attending" value="maybe" /><span class="opt">? Not yet sure</span></label>
           </div>
         </div>
 
-        <div class="grid sm:grid-cols-2 gap-5 mt-5">
+        <div class="grid sm:grid-cols-2 gap-5 mt-5 items-end">
           <div class="field">
-            <label for="guests">Number of guests</label>
-            <select id="guests" name="guests">
-              <option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option>
-            </select>
+            <label for="guestCount">Number of guests</label>
+            <div class="stepper" role="group" aria-label="Number of guests">
+              <button type="button" aria-label="Decrease guests" onclick="stepGuests(-1)">−</button>
+              <span id="guestCount">2</span>
+              <button type="button" aria-label="Increase guests" onclick="stepGuests(1)">+</button>
+            </div>
+            <input type="hidden" id="guests" name="guests" value="2" />
             <span class="hint">Including yourself.</span>
           </div>
           <div class="field">
@@ -231,111 +299,251 @@
 
         <div class="field mt-5">
           <label for="note">A note for the couple (optional)</label>
-          <textarea id="note" name="note" placeholder="We wouldn’t miss it for the world."></textarea>
+          <textarea id="note" name="note" placeholder="We wouldn't miss it for the world."></textarea>
         </div>
 
-        <div class="mt-6 flex items-center gap-3 flex-wrap">
+        <div class="mt-7 flex items-center gap-3 flex-wrap">
           <button class="btn-primary px-6 py-3 rounded-full font-semibold" type="submit">Submit RSVP</button>
           <button class="btn-ghost px-6 py-3 rounded-full font-semibold" type="button" onclick="resetForm()">Clear</button>
         </div>
       </form>
 
-      <div id="confirmation" class="confirmation">
-        <h3 class="serif text-2xl">Thank you for registering!</h3>
-        <p class="mt-2 text-[#5f5750]">Your reply has been noted and saved for the celebration.</p>
+      <div id="confirmation" class="confirmation items-start gap-3" role="status">
+        <svg width="26" height="26" viewBox="0 0 26 26" class="flex-shrink-0 mt-0.5" aria-hidden="true">
+          <circle cx="13" cy="13" r="12" fill="none" stroke="#4f7457" stroke-width="1.4"/>
+          <path d="M7 13.5l4 4 8-9" fill="none" stroke="#4f7457" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <h3 class="serif text-2xl">Thank you for registering!</h3>
+          <p class="mt-1 text-[var(--ink-soft)]">Your reply has been noted and saved for the celebration.</p>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div id="guest" class="page-section soft-card rounded-[2rem] p-6 sm:p-8 fade-in">
+  <!-- GUEST LIST -->
+  <section id="guest" class="page-section hidden">
+    <div class="soft-card rounded-[2rem] p-6 sm:p-10 reveal">
       <p class="section-title">Guest List</p>
       <div class="flex items-center justify-between gap-4 mt-2 flex-wrap">
-        <h2 class="serif text-3xl">Guest list</h2>
+        <h2 class="serif text-3xl">Who's celebrating with us</h2>
         <button class="btn-ghost no-print px-5 py-2.5 rounded-full font-semibold" type="button" onclick="window.print()">Print list</button>
       </div>
       <p class="print-only mt-3">Catherine &amp; Niyi &middot; RSVP list &middot; 27 March 2027</p>
 
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-7" id="guestStats"></div>
+
+      <div class="mt-6">
+        <label for="guestSearch" class="sr-only">Search guests</label>
+        <input id="guestSearch" type="search" placeholder="Search guests by name…" class="w-full sm:w-80 field-input border border-[var(--line)] bg-white/90 rounded-full px-5 py-3 outline-none focus:border-[var(--gold)]" oninput="filterGuests(this.value)" />
+      </div>
+
       <div class="mt-6 table-scroll">
         <table class="guests">
-          <caption>8 replies &middot; 14 guests attending</caption>
+          <caption id="guestCaption">8 replies &middot; 14 guests attending</caption>
           <thead>
             <tr>
               <th>Guest name</th><th>Email</th><th>Phone</th>
               <th>Attending</th><th>Guests</th><th>Dietary preferences</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td>Chidinma Eze</td><td>chidinma.eze@example.com</td><td>+44 7700 900 442</td><td><span class="tag yes">Yes</span></td><td>2</td><td>Vegetarian, no nuts</td></tr>
-            <tr><td>James &amp; Marta Whitfield</td><td>j.whitfield@example.com</td><td>+44 7700 900 173</td><td><span class="tag yes">Yes</span></td><td>2</td><td>Pescatarian</td></tr>
-            <tr><td>Tunde Bakare</td><td>tunde.bakare@example.com</td><td>+234 803 555 0142</td><td><span class="tag maybe">Maybe</span></td><td>1</td><td>Halal</td></tr>
-            <tr><td>Sophie Laurent</td><td>sophie.laurent@example.com</td><td>+33 6 12 44 88 90</td><td><span class="tag yes">Yes</span></td><td>1</td><td>Gluten free</td></tr>
-            <tr><td>The Adeyemi Family</td><td>grace.adeyemi@example.com</td><td>+44 7700 900 655</td><td><span class="tag yes">Yes</span></td><td>4</td><td>Two children’s meals</td></tr>
-            <tr><td>Michael O’Connor</td><td>m.oconnor@example.com</td><td>+353 86 555 0117</td><td><span class="tag no">No</span></td><td>0</td><td>—</td></tr>
-            <tr><td>Priya Raman</td><td>priya.raman@example.com</td><td>+44 7700 900 908</td><td><span class="tag yes">Yes</span></td><td>2</td><td>Vegan</td></tr>
-            <tr><td>Elena Rossi</td><td>elena.rossi@example.com</td><td>+39 340 555 0198</td><td><span class="tag maybe">Maybe</span></td><td>2</td><td>Dairy free</td></tr>
+          <tbody id="guestBody">
+            <tr><td data-label="Guest name">Chidinma Eze</td><td data-label="Email">chidinma.eze@example.com</td><td data-label="Phone">+44 7700 900 442</td><td data-label="Attending"><span class="tag yes">Yes</span></td><td data-label="Guests">2</td><td data-label="Dietary preferences">Vegetarian, no nuts</td></tr>
+            <tr><td data-label="Guest name">James &amp; Marta Whitfield</td><td data-label="Email">j.whitfield@example.com</td><td data-label="Phone">+44 7700 900 173</td><td data-label="Attending"><span class="tag yes">Yes</span></td><td data-label="Guests">2</td><td data-label="Dietary preferences">Pescatarian</td></tr>
+            <tr><td data-label="Guest name">Tunde Bakare</td><td data-label="Email">tunde.bakare@example.com</td><td data-label="Phone">+234 803 555 0142</td><td data-label="Attending"><span class="tag maybe">Maybe</span></td><td data-label="Guests">1</td><td data-label="Dietary preferences">Halal</td></tr>
+            <tr><td data-label="Guest name">Sophie Laurent</td><td data-label="Email">sophie.laurent@example.com</td><td data-label="Phone">+33 6 12 44 88 90</td><td data-label="Attending"><span class="tag yes">Yes</span></td><td data-label="Guests">1</td><td data-label="Dietary preferences">Gluten free</td></tr>
+            <tr><td data-label="Guest name">The Adeyemi Family</td><td data-label="Email">grace.adeyemi@example.com</td><td data-label="Phone">+44 7700 900 655</td><td data-label="Attending"><span class="tag yes">Yes</span></td><td data-label="Guests">4</td><td data-label="Dietary preferences">Two children's meals</td></tr>
+            <tr><td data-label="Guest name">Michael O'Connor</td><td data-label="Email">m.oconnor@example.com</td><td data-label="Phone">+353 86 555 0117</td><td data-label="Attending"><span class="tag no">No</span></td><td data-label="Guests">0</td><td data-label="Dietary preferences">—</td></tr>
+            <tr><td data-label="Guest name">Priya Raman</td><td data-label="Email">priya.raman@example.com</td><td data-label="Phone">+44 7700 900 908</td><td data-label="Attending"><span class="tag yes">Yes</span></td><td data-label="Guests">2</td><td data-label="Dietary preferences">Vegan</td></tr>
+            <tr><td data-label="Guest name">Elena Rossi</td><td data-label="Email">elena.rossi@example.com</td><td data-label="Phone">+39 340 555 0198</td><td data-label="Attending"><span class="tag maybe">Maybe</span></td><td data-label="Guests">2</td><td data-label="Dietary preferences">Dairy free</td></tr>
           </tbody>
         </table>
+        <p id="noResults" class="hidden text-center text-sm text-[var(--muted)] py-8">No guests match your search.</p>
       </div>
     </div>
   </section>
 
-  <section id="contact" class="page-section hidden mt-8">
-    <div class="soft-card rounded-[2rem] p-6 sm:p-8 fade-in">
+  <!-- CONTACT -->
+  <section id="contact" class="page-section hidden">
+    <div class="soft-card rounded-[2rem] p-6 sm:p-10 reveal">
       <p class="section-title">Contact</p>
       <h2 class="serif text-3xl mt-2">Reach out to us</h2>
-      <div class="grid md:grid-cols-3 gap-4 mt-6">
+      <div class="grid md:grid-cols-3 gap-4 mt-7">
         <div class="pill rounded-2xl p-5">
-          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Email</p>
-          <p class="mt-2 font-semibold">catherine.niyi@example.com</p>
-          <p class="mt-1 text-sm text-[#776d63]">For RSVP and event questions</p>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          <p class="text-xs uppercase tracking-[0.2em] text-[var(--gold)] font-semibold mt-3">Email</p>
+          <p class="mt-2 font-semibold break-all"><a href="mailto:catherine.niyi@example.com" class="hover:text-[var(--gold)] transition">catherine.niyi@example.com</a></p>
+          <p class="mt-1 text-sm text-[var(--muted)]">For RSVP and event questions</p>
+          <button class="btn-ghost mt-3 px-4 py-2 rounded-full text-xs font-semibold" onclick="copyText('catherine.niyi@example.com', this)">Copy email</button>
         </div>
         <div class="pill rounded-2xl p-5">
-          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Phone</p>
-          <p class="mt-2 font-semibold">+44 7700 900 123</p>
-          <p class="mt-1 text-sm text-[#776d63]">Available weekdays, 9am–6pm</p>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" aria-hidden="true"><path d="M4 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L14 13l5 2v4a2 2 0 0 1-2 2C9.5 21 3 14.5 3 6a2 2 0 0 1 2-2z"/></svg>
+          <p class="text-xs uppercase tracking-[0.2em] text-[var(--gold)] font-semibold mt-3">Phone</p>
+          <p class="mt-2 font-semibold"><a href="tel:+447700900123" class="hover:text-[var(--gold)] transition">+44 7700 900 123</a></p>
+          <p class="mt-1 text-sm text-[var(--muted)]">Available weekdays, 9am–6pm</p>
+          <button class="btn-ghost mt-3 px-4 py-2 rounded-full text-xs font-semibold" onclick="copyText('+44 7700 900 123', this)">Copy number</button>
         </div>
         <div class="pill rounded-2xl p-5">
-          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Message</p>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <p class="text-xs uppercase tracking-[0.2em] text-[var(--gold)] font-semibold mt-3">Message</p>
           <p class="mt-2 font-semibold">Use the RSVP form to leave a note</p>
-          <p class="mt-1 text-sm text-[#776d63]">We’d love to hear from you</p>
+          <p class="mt-1 text-sm text-[var(--muted)]">We'd love to hear from you</p>
+          <button data-target="rsvp" class="btn-ghost mt-3 px-4 py-2 rounded-full text-xs font-semibold">Go to RSVP</button>
         </div>
       </div>
     </div>
   </section>
 </main>
 
-<footer class="footer max-w-6xl mx-auto px-4 sm:px-6 pb-8 pt-10 text-sm text-[#776d63] flex flex-col sm:flex-row items-center justify-between gap-3">
-  <span class="serif text-base text-[#3e3a35]">C &amp; N</span>
-  <span>Save the date • 27 March 2027</span>
-  <button class="text-[#8b6f49] hover:text-[#3e3a35] transition" type="button" onclick="showSection('home')">Back to top</button>
+<footer class="footer max-w-6xl mx-auto px-4 sm:px-6 pb-10 pt-8">
+  <div class="rule mb-6"><span></span><span class="text-[var(--gold)]">&#10047;</span><span></span></div>
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)]">
+    <span class="serif text-base text-[var(--ink)]">C &amp; N</span>
+    <span>With love, we can't wait to celebrate with you &middot; 27 March 2027</span>
+    <button class="text-[var(--gold)] hover:text-[var(--ink)] transition" type="button" data-target="home">Back to top</button>
+  </div>
 </footer>
 
 <script>
-  const form = document.getElementById('rsvpForm');
-  const confirmation = document.getElementById('confirmation');
   const sections = document.querySelectorAll('.page-section');
+  const navLinks = document.querySelectorAll('.nav-link');
 
   function showSection(id){
-    sections.forEach(section => {
-      section.classList.add('hidden');
-      if(section.id === id) section.classList.remove('hidden');
-    });
+    sections.forEach(s => s.classList.toggle('hidden', s.id !== id));
+    navLinks.forEach(l => l.classList.toggle('active', l.dataset.target === id));
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelectorAll('#' + id + ' .reveal').forEach(el => observer.observe(el));
   }
 
+  document.querySelectorAll('[data-target]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      showSection(btn.dataset.target);
+      document.getElementById('mobileMenu').classList.add('hidden');
+    });
+  });
+
   function toggleMobileMenu(){
-    document.getElementById('mobileMenu').classList.toggle('hidden');
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
   }
+
+  // scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: .12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // RSVP form
+  const form = document.getElementById('rsvpForm');
+  const confirmation = document.getElementById('confirmation');
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
+    let valid = true;
+    const nameField = document.getElementById('fld-name');
+    const emailField = document.getElementById('fld-email');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+
+    nameField.classList.toggle('invalid', nameInput.value.trim() === '');
+    if(nameInput.value.trim() === '') valid = false;
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
+    emailField.classList.toggle('invalid', !emailOk);
+    if(!emailOk) valid = false;
+
+    if(!valid) return;
+
     confirmation.classList.add('show');
     confirmation.scrollIntoView({behavior:'smooth', block:'nearest'});
   });
 
   function resetForm(){
     form.reset();
+    document.getElementById('fld-name').classList.remove('invalid');
+    document.getElementById('fld-email').classList.remove('invalid');
     confirmation.classList.remove('show');
+    setGuests(2);
   }
+
+  // guest stepper
+  function setGuests(n){
+    n = Math.max(1, Math.min(8, n));
+    document.getElementById('guestCount').textContent = n;
+    document.getElementById('guests').value = n;
+  }
+  function stepGuests(delta){
+    setGuests(parseInt(document.getElementById('guests').value, 10) + delta);
+  }
+
+  // guest list stats + search
+  function computeStats(){
+    const rows = [...document.querySelectorAll('#guestBody tr')];
+    let yes = 0, no = 0, maybe = 0, guestsYes = 0;
+    rows.forEach(r => {
+      const tag = r.querySelector('.tag');
+      const count = parseInt(r.children[4].textContent, 10) || 0;
+      if(tag.classList.contains('yes')){ yes++; guestsYes += count; }
+      else if(tag.classList.contains('no')) no++;
+      else maybe++;
+    });
+    document.getElementById('guestStats').innerHTML = `
+      <div class="stat"><b>${rows.length}</b><span class="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">Replies</span></div>
+      <div class="stat"><b style="color:#4f7457">${yes}</b><span class="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">Confirmed</span></div>
+      <div class="stat"><b style="color:#845c1f">${maybe}</b><span class="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">Maybe</span></div>
+      <div class="stat"><b style="color:var(--ink)">${guestsYes}</b><span class="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">Guests attending</span></div>
+    `;
+    document.getElementById('guestCaption').textContent = `${rows.length} replies · ${guestsYes} guests attending`;
+  }
+  computeStats();
+
+  function filterGuests(q){
+    q = q.trim().toLowerCase();
+    const rows = [...document.querySelectorAll('#guestBody tr')];
+    let visible = 0;
+    rows.forEach(r => {
+      const name = r.children[0].textContent.toLowerCase();
+      const match = name.includes(q);
+      r.style.display = match ? '' : 'none';
+      if(match) visible++;
+    });
+    document.getElementById('noResults').classList.toggle('hidden', visible !== 0);
+  }
+
+  // copy to clipboard
+  function copyText(text, btn){
+    const original = btn.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = original, 1600);
+    }).catch(() => {
+      btn.textContent = 'Copy failed';
+      setTimeout(() => btn.textContent = original, 1600);
+    });
+  }
+
+  // countdown
+  const target = new Date('2027-03-27T00:00:00');
+  function tickCountdown(){
+    const diff = target - new Date();
+    if(diff <= 0){
+      document.getElementById('cdDays').textContent = '0';
+      document.getElementById('cdHours').textContent = '0';
+      document.getElementById('cdMins').textContent = '0';
+      document.getElementById('cdSecs').textContent = '0';
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cdDays').textContent = d;
+    document.getElementById('cdHours').textContent = h;
+    document.getElementById('cdMins').textContent = m;
+    document.getElementById('cdSecs').textContent = s;
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
 
   showSection('home');
 </script>

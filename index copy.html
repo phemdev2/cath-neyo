@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Save the Date — Catherine &amp; Niyi, 27 March 2027</title>
+<meta name="description" content="Save the date, RSVP registration, guest list, and contact details for Catherine and Niyi's wedding." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#fbf7ef;
+    --bg2:#fffaf3;
+    --card:#fffdf9;
+    --text:#3e3a35;
+    --muted:#776d63;
+    --line:#eadfcd;
+    --rose:#dca9b4;
+    --rose2:#e7c1c8;
+    --gold:#c9a45a;
+    --sage:#8da48e;
+    --shadow:0 18px 50px rgba(122,95,62,.10);
+  }
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(231,193,200,.34), transparent 28%),
+      radial-gradient(circle at top right, rgba(201,164,90,.14), transparent 24%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+  }
+  .serif{font-family:'Playfair Display',serif}
+  .nav-blur{backdrop-filter:blur(10px); background:rgba(251,247,239,.84)}
+  .soft-card{
+    background:rgba(255,253,249,.9);
+    border:1px solid rgba(234,223,205,.95);
+    box-shadow:var(--shadow);
+  }
+  .pill{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.76);
+  }
+  .gold-line{
+    height:1px;
+    background:linear-gradient(90deg, transparent, rgba(201,164,90,.7), transparent);
+  }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--rose2) 0%, var(--rose) 100%);
+    color:white;
+    box-shadow:0 10px 24px rgba(220,169,180,.35);
+    transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 14px 28px rgba(220,169,180,.42)}
+  .btn-ghost{
+    background:rgba(255,255,255,.8);
+    border:1px solid var(--line);
+    transition:background .2s ease, transform .2s ease;
+  }
+  .btn-ghost:hover{background:#fff; transform:translateY(-1px)}
+  .rule{display:flex; align-items:center; gap:.8rem; justify-content:center; margin:1rem 0}
+  .rule span{flex:1; height:1px; background:linear-gradient(90deg, transparent, rgba(201,164,90,.55), transparent)}
+  .rule i{color:var(--gold); font-style:normal; font-size:1.1rem}
+  .field label{display:block; font-weight:600; margin-bottom:.45rem}
+  .field input,.field select,.field textarea{
+    width:100%;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.9);
+    border-radius:1rem;
+    padding:.9rem 1rem;
+    outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:rgba(201,164,90,.8);
+    box-shadow:0 0 0 4px rgba(201,164,90,.12);
+  }
+  .field textarea{min-height:120px; resize:vertical}
+  .hint{display:block; color:var(--muted); font-size:.84rem; margin-top:.45rem}
+  .radio-row{display:flex; gap:.7rem; flex-wrap:wrap}
+  .radio-row label{
+    display:flex; align-items:center; gap:.55rem;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.78);
+    padding:.75rem 1rem;
+    border-radius:999px;
+    cursor:pointer;
+    transition:transform .2s ease, background .2s ease, border-color .2s ease;
+  }
+  .radio-row label:hover{transform:translateY(-1px)}
+  .radio-row input{accent-color:var(--gold)}
+  .table-scroll{overflow-x:auto; border-radius:1.5rem; border:1px solid var(--line); background:rgba(255,255,255,.72); box-shadow:var(--shadow)}
+  table{width:100%; border-collapse:collapse; min-width:860px}
+  caption{caption-side:top; text-align:left; padding:1rem 1.25rem; font-weight:600; color:var(--muted)}
+  th,td{padding:1rem 1.25rem; border-top:1px solid rgba(234,223,205,.75); text-align:left; vertical-align:top}
+  th{font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; color:#7a6d61; background:rgba(255,250,243,.9)}
+  .tag{display:inline-flex; align-items:center; justify-content:center; padding:.35rem .75rem; border-radius:999px; font-size:.8rem; font-weight:600}
+  .tag.yes{background:rgba(141,164,142,.16); color:#577359}
+  .tag.no{background:rgba(220,169,180,.18); color:#a15f6d}
+  .tag.maybe{background:rgba(201,164,90,.16); color:#8b6a22}
+  .confirmation{display:none; margin-top:1.25rem; padding:1rem 1.15rem; border-radius:1.25rem; background:linear-gradient(135deg, rgba(141,164,142,.14), rgba(255,255,255,.85)); border:1px solid rgba(141,164,142,.26)}
+  .confirmation.show{display:block}
+  .fade-in{animation:fadeIn .65s ease both}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)}}
+  .print-only{display:none}
+  .section-title{
+    text-transform:uppercase;
+    letter-spacing:.22em;
+    font-size:.75rem;
+    color:#8b6f49;
+    font-weight:700;
+  }
+  @media print{
+    .no-print,.nav,.footer,.form,.confirmation{display:none !important}
+    body{background:#fff}
+    .print-only{display:block}
+    .soft-card{box-shadow:none}
+    .table-scroll{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+<header class="nav nav-blur sticky top-0 z-50 border-b border-[#eadfcd]">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-20 gap-4">
+      <div class="flex items-center gap-3">
+        <div class="h-11 w-11 rounded-full border border-[rgba(201,164,90,.45)] bg-white flex items-center justify-center shadow-sm">
+          <span class="serif text-xl text-[#c9a45a]">C &amp; N</span>
+        </div>
+        <div>
+          <p class="serif text-lg sm:text-xl font-bold tracking-wide">Catherine &amp; Niyi</p>
+          <p class="text-xs sm:text-sm text-[#776d63]">27 March 2027</p>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center gap-2">
+        <button onclick="showSection('home')" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/80 transition">Home</button>
+        <button onclick="showSection('rsvp')" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/80 transition">RSVP Registration</button>
+        <button onclick="showSection('guest')" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/80 transition">Guest List</button>
+        <button onclick="showSection('contact')" class="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/80 transition">Contact</button>
+      </nav>
+      <button class="md:hidden btn-ghost px-4 py-2 rounded-full text-sm font-semibold" onclick="toggleMobileMenu()">Menu</button>
+    </div>
+    <div id="mobileMenu" class="md:hidden hidden pb-4">
+      <div class="soft-card rounded-2xl p-3 flex flex-col gap-2">
+        <button onclick="showSection('home');toggleMobileMenu()" class="text-left px-4 py-3 rounded-xl hover:bg-white transition">Home</button>
+        <button onclick="showSection('rsvp');toggleMobileMenu()" class="text-left px-4 py-3 rounded-xl hover:bg-white transition">RSVP Registration</button>
+        <button onclick="showSection('guest');toggleMobileMenu()" class="text-left px-4 py-3 rounded-xl hover:bg-white transition">Guest List</button>
+        <button onclick="showSection('contact');toggleMobileMenu()" class="text-left px-4 py-3 rounded-xl hover:bg-white transition">Contact</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+  <section id="home" class="page-section hero text-center py-8 sm:py-14 fade-in">
+    <p class="uppercase tracking-[0.28em] text-xs sm:text-sm text-[#8b6f49]">Save the date</p>
+    <h1 class="serif text-4xl sm:text-5xl lg:text-6xl mt-4">Catherine &amp; Niyi</h1>
+    <p class="mt-4 text-base sm:text-lg text-[#5f5750]">We are delighted to invite you to celebrate our wedding day.</p>
+    <div class="rule max-w-md mx-auto"><span></span><i>&#10047;</i><span></span></div>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+      <div class="pill px-5 py-3 rounded-full text-sm font-semibold">Saturday, 27 March 2027</div>
+      <div class="pill px-5 py-3 rounded-full text-sm font-semibold">RSVP by 1 February 2027</div>
+      <div class="pill px-5 py-3 rounded-full text-sm font-semibold">Love • Joy • Celebration</div>
+    </div>
+    <div class="mt-8 soft-card rounded-[2rem] p-6 sm:p-8 max-w-3xl mx-auto">
+      <p class="section-title">Save the date</p>
+      <h2 class="serif text-2xl sm:text-3xl mt-3">A beautiful day is coming</h2>
+      <p class="mt-4 text-[#5f5750] leading-7">Join us as we begin our next chapter surrounded by family and friends. Please use the navigation above to register your RSVP, view the guest list, or contact us.</p>
+      <div class="mt-6 grid sm:grid-cols-3 gap-4 text-left">
+        <div class="pill rounded-2xl p-4">
+          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Date</p>
+          <p class="mt-2 font-semibold">27 March 2027</p>
+        </div>
+        <div class="pill rounded-2xl p-4">
+          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Venue</p>
+          <p class="mt-2 font-semibold">Ceremony &amp; reception details to follow</p>
+        </div>
+        <div class="pill rounded-2xl p-4">
+          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Dress code</p>
+          <p class="mt-2 font-semibold">Elegant celebration attire</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="rsvp" class="page-section grid lg:grid-cols-2 gap-8 items-start hidden">
+    <div id="rsvpCard" class="soft-card rounded-[2rem] p-6 sm:p-8 fade-in">
+      <p class="section-title">RSVP Registration</p>
+      <h2 class="serif text-3xl mt-2">Let us know you’re coming</h2>
+      <form class="form mt-6" id="rsvpForm">
+        <div class="field mb-5">
+          <label for="name">Guest name</label>
+          <input id="name" name="name" type="text" placeholder="Chidinma Eze" required />
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="chidinma.eze@example.com" required />
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="+44 7700 900 442" />
+          </div>
+        </div>
+
+        <div class="field mt-5">
+          <label>Will you attend?</label>
+          <div class="radio-row">
+            <label><input type="radio" name="attending" value="yes" checked /><span>Yes</span></label>
+            <label><input type="radio" name="attending" value="no" /><span>No</span></label>
+            <label><input type="radio" name="attending" value="maybe" /><span>Maybe</span></label>
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-5 mt-5">
+          <div class="field">
+            <label for="guests">Number of guests</label>
+            <select id="guests" name="guests">
+              <option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option>
+            </select>
+            <span class="hint">Including yourself.</span>
+          </div>
+          <div class="field">
+            <label for="diet">Dietary preferences</label>
+            <input id="diet" name="diet" type="text" placeholder="Vegetarian, no nuts" />
+          </div>
+        </div>
+
+        <div class="field mt-5">
+          <label for="note">A note for the couple (optional)</label>
+          <textarea id="note" name="note" placeholder="We wouldn’t miss it for the world."></textarea>
+        </div>
+
+        <div class="mt-6 flex items-center gap-3 flex-wrap">
+          <button class="btn-primary px-6 py-3 rounded-full font-semibold" type="submit">Submit RSVP</button>
+          <button class="btn-ghost px-6 py-3 rounded-full font-semibold" type="button" onclick="resetForm()">Clear</button>
+        </div>
+      </form>
+
+      <div id="confirmation" class="confirmation">
+        <h3 class="serif text-2xl">Thank you for registering!</h3>
+        <p class="mt-2 text-[#5f5750]">Your reply has been noted and saved for the celebration.</p>
+      </div>
+    </div>
+
+    <div id="guest" class="page-section soft-card rounded-[2rem] p-6 sm:p-8 fade-in">
+      <p class="section-title">Guest List</p>
+      <div class="flex items-center justify-between gap-4 mt-2 flex-wrap">
+        <h2 class="serif text-3xl">Guest list</h2>
+        <button class="btn-ghost no-print px-5 py-2.5 rounded-full font-semibold" type="button" onclick="window.print()">Print list</button>
+      </div>
+      <p class="print-only mt-3">Catherine &amp; Niyi &middot; RSVP list &middot; 27 March 2027</p>
+
+      <div class="mt-6 table-scroll">
+        <table class="guests">
+          <caption>8 replies &middot; 14 guests attending</caption>
+          <thead>
+            <tr>
+              <th>Guest name</th><th>Email</th><th>Phone</th>
+              <th>Attending</th><th>Guests</th><th>Dietary preferences</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Chidinma Eze</td><td>chidinma.eze@example.com</td><td>+44 7700 900 442</td><td><span class="tag yes">Yes</span></td><td>2</td><td>Vegetarian, no nuts</td></tr>
+            <tr><td>James &amp; Marta Whitfield</td><td>j.whitfield@example.com</td><td>+44 7700 900 173</td><td><span class="tag yes">Yes</span></td><td>2</td><td>Pescatarian</td></tr>
+            <tr><td>Tunde Bakare</td><td>tunde.bakare@example.com</td><td>+234 803 555 0142</td><td><span class="tag maybe">Maybe</span></td><td>1</td><td>Halal</td></tr>
+            <tr><td>Sophie Laurent</td><td>sophie.laurent@example.com</td><td>+33 6 12 44 88 90</td><td><span class="tag yes">Yes</span></td><td>1</td><td>Gluten free</td></tr>
+            <tr><td>The Adeyemi Family</td><td>grace.adeyemi@example.com</td><td>+44 7700 900 655</td><td><span class="tag yes">Yes</span></td><td>4</td><td>Two children’s meals</td></tr>
+            <tr><td>Michael O’Connor</td><td>m.oconnor@example.com</td><td>+353 86 555 0117</td><td><span class="tag no">No</span></td><td>0</td><td>—</td></tr>
+            <tr><td>Priya Raman</td><td>priya.raman@example.com</td><td>+44 7700 900 908</td><td><span class="tag yes">Yes</span></td><td>2</td><td>Vegan</td></tr>
+            <tr><td>Elena Rossi</td><td>elena.rossi@example.com</td><td>+39 340 555 0198</td><td><span class="tag maybe">Maybe</span></td><td>2</td><td>Dairy free</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="page-section hidden mt-8">
+    <div class="soft-card rounded-[2rem] p-6 sm:p-8 fade-in">
+      <p class="section-title">Contact</p>
+      <h2 class="serif text-3xl mt-2">Reach out to us</h2>
+      <div class="grid md:grid-cols-3 gap-4 mt-6">
+        <div class="pill rounded-2xl p-5">
+          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Email</p>
+          <p class="mt-2 font-semibold">catherine.niyi@example.com</p>
+          <p class="mt-1 text-sm text-[#776d63]">For RSVP and event questions</p>
+        </div>
+        <div class="pill rounded-2xl p-5">
+          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Phone</p>
+          <p class="mt-2 font-semibold">+44 7700 900 123</p>
+          <p class="mt-1 text-sm text-[#776d63]">Available weekdays, 9am–6pm</p>
+        </div>
+        <div class="pill rounded-2xl p-5">
+          <p class="text-xs uppercase tracking-[0.2em] text-[#8b6f49] font-semibold">Message</p>
+          <p class="mt-2 font-semibold">Use the RSVP form to leave a note</p>
+          <p class="mt-1 text-sm text-[#776d63]">We’d love to hear from you</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer max-w-6xl mx-auto px-4 sm:px-6 pb-8 pt-10 text-sm text-[#776d63] flex flex-col sm:flex-row items-center justify-between gap-3">
+  <span class="serif text-base text-[#3e3a35]">C &amp; N</span>
+  <span>Save the date • 27 March 2027</span>
+  <button class="text-[#8b6f49] hover:text-[#3e3a35] transition" type="button" onclick="showSection('home')">Back to top</button>
+</footer>
+
+<script>
+  const form = document.getElementById('rsvpForm');
+  const confirmation = document.getElementById('confirmation');
+  const sections = document.querySelectorAll('.page-section');
+
+  function showSection(id){
+    sections.forEach(section => {
+      section.classList.add('hidden');
+      if(section.id === id) section.classList.remove('hidden');
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleMobileMenu(){
+    document.getElementById('mobileMenu').classList.toggle('hidden');
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    confirmation.classList.add('show');
+    confirmation.scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+
+  function resetForm(){
+    form.reset();
+    confirmation.classList.remove('show');
+  }
+
+  showSection('home');
+</script>
+</body>
+</html>
