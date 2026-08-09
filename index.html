@@ -172,6 +172,19 @@
   }
   .hero-photo-badge span{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.1rem; color:var(--ink)}
 
+  .cal-wrap{display:inline-block}
+  .cal-menu{
+    position:absolute; top:calc(100% + .5rem); left:50%; transform:translateX(-50%);
+    background:#fffdf8; border:1px solid var(--line); border-radius:1rem;
+    box-shadow:var(--shadow); padding:.4rem; min-width:200px; z-index:20;
+  }
+  .cal-menu.hidden{display:none}
+  .cal-menu button{
+    display:block; width:100%; text-align:left; padding:.65rem .9rem; border-radius:.7rem;
+    font-size:.9rem; font-weight:600; color:var(--ink-soft); transition:background .15s ease;
+  }
+  .cal-menu button:hover{background:rgba(169,123,52,.09); color:var(--ink)}
+
   .print-only{display:none}
   @media print{
     .no-print,.nav,.footer,.form,.confirmation{display:none !important}
@@ -241,6 +254,16 @@
       <div class="pill px-5 py-3 rounded-full text-sm font-semibold">Saturday, 27 March 2027</div>
       <div class="pill px-5 py-3 rounded-full text-sm font-semibold">RSVP by 1 February 2027</div>
       <button data-target="rsvp" class="btn-primary px-6 py-3 rounded-full text-sm font-semibold">Register your RSVP</button>
+      <div class="cal-wrap relative">
+        <button type="button" class="btn-ghost px-6 py-3 rounded-full text-sm font-semibold inline-flex items-center gap-2" onclick="toggleCalMenu()" aria-haspopup="true" aria-expanded="false" id="calBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Add to calendar
+        </button>
+        <div id="calMenu" class="cal-menu hidden" role="menu">
+          <button type="button" role="menuitem" onclick="addToCalendar('google')">Google Calendar</button>
+          <button type="button" role="menuitem" onclick="addToCalendar('ics')">Apple / Outlook (.ics)</button>
+        </div>
+      </div>
     </div>
 
     <div class="mt-10 soft-card rounded-[2rem] p-6 sm:p-10 max-w-3xl mx-auto text-left reveal">
@@ -539,6 +562,57 @@
       btn.textContent = 'Copy failed';
       setTimeout(() => btn.textContent = original, 1600);
     });
+  }
+
+  // add to calendar
+  const eventTitle = "Catherine & Niyi's Wedding";
+  const eventDetails = "We're getting married! Join us to celebrate — ceremony and reception details to follow.";
+  const eventStartDate = '20270327';
+  const eventEndDate = '20270328'; // exclusive end for all-day events
+
+  function toggleCalMenu(forceClose){
+    const menu = document.getElementById('calMenu');
+    const btn = document.getElementById('calBtn');
+    const willShow = forceClose === true ? false : menu.classList.contains('hidden');
+    menu.classList.toggle('hidden', !willShow);
+    btn.setAttribute('aria-expanded', String(willShow));
+  }
+  document.addEventListener('click', function(e){
+    const wrap = document.querySelector('.cal-wrap');
+    if(wrap && !wrap.contains(e.target)) toggleCalMenu(true);
+  });
+
+  function addToCalendar(type){
+    if(type === 'google'){
+      const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+        + '&text=' + encodeURIComponent(eventTitle)
+        + '&dates=' + eventStartDate + '/' + eventEndDate
+        + '&details=' + encodeURIComponent(eventDetails);
+      window.open(url, '_blank', 'noopener');
+    } else if(type === 'ics'){
+      const ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Catherine and Niyi//Wedding//EN',
+        'BEGIN:VEVENT',
+        'UID:' + Date.now() + '@catherine-niyi-wedding',
+        'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z',
+        'DTSTART;VALUE=DATE:' + eventStartDate,
+        'DTEND;VALUE=DATE:' + eventEndDate,
+        'SUMMARY:' + eventTitle,
+        'DESCRIPTION:' + eventDetails,
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'catherine-and-niyi-wedding.ics';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    toggleCalMenu(true);
   }
 
   // countdown
