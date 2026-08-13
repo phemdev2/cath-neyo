@@ -13,9 +13,7 @@
   --gold-line: rgba(169, 123, 52, 0.45);
   --blush: #c69b93;
   --line: #e2d5b3;
-  /* Darkened slightly from #6c6152 — the original didn't reliably clear
-     4.5:1 contrast at small text sizes against the ivory background. */
-  --muted: #5c5244;
+  --muted: #6c6152;
   --shadow: 0 26px 60px rgba(28, 43, 34, 0.14);
   --shadow-sm: 0 10px 26px rgba(28, 43, 34, 0.08);
 }
@@ -80,42 +78,6 @@ body {
 }
 .nav-link.active::after {
   transform: scaleX(1);
-}
-
-/* Animated hamburger for the mobile nav toggle — replaces the plain "Menu"
-   text button with a clearer, more polished tap target that morphs to an X
-   when open. */
-.hamburger-btn {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-}
-.hamburger {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 18px;
-  height: 13px;
-}
-.hamburger span {
-  display: block;
-  width: 100%;
-  height: 2px;
-  background: var(--ink);
-  border-radius: 2px;
-  transition: transform 0.25s ease, opacity 0.2s ease;
-}
-.hamburger.open span:nth-child(1) {
-  transform: translateY(5.5px) rotate(45deg);
-}
-.hamburger.open span:nth-child(2) {
-  opacity: 0;
-}
-.hamburger.open span:nth-child(3) {
-  transform: translateY(-5.5px) rotate(-45deg);
 }
 
 .soft-card {
@@ -184,27 +146,6 @@ body {
   font-size: 0.72rem;
   color: var(--gold);
   font-weight: 700;
-}
-
-/* Lightweight meta line for secondary info (date / RSVP deadline) so it
-   doesn't compete visually with the primary CTA buttons below it. */
-.hero-meta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-}
-.hero-meta .dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--gold);
-  flex: none;
 }
 
 .field label {
@@ -354,11 +295,6 @@ body {
   border-radius: 180px 180px 28px 28px;
   border: 1px solid var(--gold-line);
   box-shadow: var(--shadow);
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
-}
-.hero-photo-frame:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 32px 70px rgba(28, 43, 34, 0.18);
 }
 .hero-photo-frame::before {
   content: "";
@@ -390,7 +326,6 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 8px 18px rgba(28, 43, 34, 0.18);
-  z-index: 2;
 }
 .hero-photo-badge span {
   font-family: "Cormorant Garamond", serif;
@@ -405,10 +340,6 @@ body {
   border-radius: 1.1rem;
   padding: 0.9rem 1.1rem;
   min-width: 5.4rem;
-  transition: transform 0.2s ease;
-}
-.countdown-box:hover {
-  transform: translateY(-2px);
 }
 .countdown-box b {
   display: block;
@@ -421,18 +352,6 @@ body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gold-soft);
-}
-
-/* Prevent the 4-box countdown row from overflowing very narrow phones
-   (iPhone SE and similar, ~360-375px wide). */
-@media (max-width: 380px) {
-  .countdown-box {
-    min-width: 4.5rem;
-    padding: 0.7rem 0.5rem;
-  }
-  .countdown-box b {
-    font-size: 1.35rem;
-  }
 }
 
 .print-only {
@@ -458,17 +377,111 @@ body {
   }
 }
 
-.edit-input {
-  width: 100%;
-  min-width: 120px;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid var(--gold-soft);
-  border-radius: 0.6rem;
-  background: #fffdf7;
-  font-size: 0.875rem;
-  color: var(--ink);
+.stat {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 1.1rem;
+  padding: 1.1rem 1.3rem;
 }
-.edit-input:focus {
-  outline: none;
-  border-color: var(--gold);
+.stat b {
+  display: block;
+  font-family: "Playfair Display", serif;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border-radius: 1.4rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: var(--shadow-sm);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+caption {
+  caption-side: top;
+  text-align: left;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+th,
+td {
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid rgba(226, 213, 179, 0.75);
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.94rem;
+}
+th {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--gold);
+  background: rgba(255, 250, 238, 0.9);
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.tag.yes {
+  background: rgba(89, 124, 96, 0.14);
+  color: #3f6146;
+}
+.tag.no {
+  background: rgba(198, 155, 147, 0.22);
+  color: #8a4f47;
+}
+
+@media (max-width: 700px) {
+  table.guests,
+  table.guests thead,
+  table.guests tbody,
+  table.guests th,
+  table.guests td,
+  table.guests tr {
+    display: block;
+  }
+  table.guests thead {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+  }
+  table.guests tr {
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    margin: 0 1rem 1rem;
+    padding: 0.5rem 0.25rem;
+    background: #fff;
+  }
+  table.guests tr:last-child {
+    margin-bottom: 1.25rem;
+  }
+  table.guests td {
+    border-top: none;
+    padding: 0.5rem 1rem 0.5rem 44%;
+    position: relative;
+    min-height: 1.6rem;
+  }
+  table.guests td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    width: 40%;
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
 }

@@ -1,0 +1,115 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabaseClient";
+
+export default function AdminLogin() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  // If already signed in, skip straight to the dashboard.
+  useEffect(() => {
+    if (!supabase) {
+      setCheckingSession(false);
+      return;
+    }
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        router.replace("/admin");
+      } else {
+        setCheckingSession(false);
+      }
+    });
+  }, [router]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError(null);
+
+    if (!supabase) {
+      setError(
+        "Supabase isn't connected yet. Please add your credentials to .env.local — see README.md."
+      );
+      return;
+    }
+
+    setLoading(true);
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    setLoading(false);
+
+    if (signInError) {
+      setError("Incorrect email or password.");
+      return;
+    }
+
+    router.replace("/admin");
+  }
+
+  if (checkingSession) {
+    return (
+      <main className="max-w-md mx-auto px-4 py-24 text-center text-[var(--muted)]">
+        Loading…
+      </main>
+    );
+  }
+
+  return (
+    <main className="max-w-md mx-auto px-4 sm:px-6 py-16 sm:py-24">
+      <div className="soft-card rounded-[2rem] p-6 sm:p-10 reveal">
+        <p className="section-title">Admin</p>
+        <h1 className="serif text-3xl mt-2">Sign in</h1>
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          Sign in to view RSVP responses.
+        </p>
+
+        <form className="form mt-7" onSubmit={handleSubmit} noValidate>
+          <div className="field mb-5">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="field mb-5">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            className="btn-primary px-6 py-3 rounded-full font-semibold disabled:opacity-60 w-full"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Signing in…" : "Sign in"}
+          </button>
+
+          {error && (
+            <p className="mt-4 text-sm text-[#a13f3a]" role="alert">
+              {error}
+            </p>
+          )}
+        </form>
+      </div>
+    </main>
+  );
+}
