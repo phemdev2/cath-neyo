@@ -95,7 +95,7 @@ export default function Home() {
   function addToCalendar() {
     const url =
       "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      "&text=" + encodeURIComponent("Catherine & Niyi's Wedding") +
+      "&text=" + encodeURIComponent("Ife & Niyi's Wedding") +
       "&dates=20270327/20270328" +
       "&details=" + encodeURIComponent("We're getting married! Join us to celebrate — full details to follow.");
     window.open(url, "_blank", "noopener");
@@ -115,7 +115,7 @@ export default function Home() {
                 </text>
               </svg>
               <div>
-                <p className="serif text-lg sm:text-xl font-bold tracking-wide">Catherine &amp; Niyi</p>
+                <p className="serif text-lg sm:text-xl font-bold tracking-wide">Ife &amp; Niyi</p>
                 <p className="text-xs sm:text-sm text-[var(--muted)]">27 March 2027</p>
               </div>
             </div>
@@ -161,14 +161,14 @@ export default function Home() {
         {section === "home" && (
           <section className="text-center py-6 sm:py-10">
             <div className="hero-photo-frame fade-up mb-9" style={{ animationDelay: ".05s" }}>
-              <img src="/couple.jpg" alt="Catherine and Niyi beneath a flower-covered arch at the beach" />
+              <img src="/couple.webp" alt="Ife and Niyi beneath a flower-covered arch at the beach" />
               <div className="hero-photo-badge" aria-hidden="true">
                 <span>C&amp;N</span>
               </div>
             </div>
 
             <p className="section-title fade-up" style={{ animationDelay: ".1s" }}>Save the date</p>
-            <h1 className="serif text-4xl sm:text-6xl mt-4 fade-up" style={{ animationDelay: ".18s" }}>Catherine &amp; Niyi</h1>
+            <h1 className="serif text-4xl sm:text-6xl mt-4 fade-up" style={{ animationDelay: ".18s" }}>Ife &amp; Niyi</h1>
             <p className="mt-4 text-base sm:text-lg text-[var(--ink-soft)] script fade-up" style={{ animationDelay: ".26s" }}>
               are joyfully getting married
             </p>
