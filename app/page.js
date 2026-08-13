@@ -106,10 +106,10 @@ export default function Home() {
     <>
       <header className="nav nav-blur sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-20 gap-4">
-            <div className="flex items-center gap-3">
-              <div>
-                <p className="serif text-lg sm:text-xl font-bold tracking-wide">Ife &amp; Niyi</p>
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="min-w-0">
+                <p className="serif text-base sm:text-xl font-bold tracking-wide truncate">Ife &amp; Niyi</p>
                 <p className="text-xs sm:text-sm text-[var(--muted)]">27 March 2027</p>
               </div>
             </div>
@@ -125,7 +125,7 @@ export default function Home() {
               ))}
             </nav>
             <button
-              className="md:hidden btn-ghost px-4 py-2 rounded-full text-sm font-semibold"
+              className="md:hidden btn-ghost px-3.5 py-2 rounded-full text-sm font-semibold shrink-0"
               onClick={() => setMobileOpen((v) => !v)}
               aria-expanded={mobileOpen}
               aria-controls="mobileMenu"
@@ -151,52 +151,81 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-14">
         {section === "home" && (
-          <section className="text-center py-6 sm:py-10">
-            <div className="flyer-frame fade-up mb-9" style={{ animationDelay: ".05s" }}>
-              <img src="/image.png" alt="Save the date: Ife &amp; Niyi, Saturday 27 March 2027, Tirana, Albania. Invitation to follow." />
-            </div>
+          <section className="py-4 sm:py-10">
+            {/*
+              hero-grid (see globals.css):
+              - mobile / tablet: single column, everything stacks
+                (image, then countdown, then message card, then CTAs)
+              - desktop (lg+): two columns side by side, image fixed-width
+                on the left, details flowing on the right, vertically centered
+            */}
+            <div className="hero-grid max-w-5xl mx-auto">
+              <div className="flyer-frame fade-up" style={{ animationDelay: ".05s" }}>
+                <img
+                  src="/image.png"
+                  alt="Save the date: Ife &amp; Niyi, Saturday 27 March 2027, Tirana, Albania. Invitation to follow."
+                />
+              </div>
 
-            <div className="flex justify-center gap-3 sm:gap-4 flex-wrap fade-up" style={{ animationDelay: ".15s" }} aria-live="polite">
-              <div className="countdown-box"><b>{countdown.d}</b><span>Days</span></div>
-              <div className="countdown-box"><b>{countdown.h}</b><span>Hours</span></div>
-              <div className="countdown-box"><b>{countdown.m}</b><span>Minutes</span></div>
-              <div className="countdown-box"><b>{countdown.s}</b><span>Seconds</span></div>
-            </div>
+              <div className="text-center lg:text-left">
+                <div
+                  className="countdown-grid fade-up max-w-sm mx-auto lg:max-w-md lg:mx-0"
+                  style={{ animationDelay: ".15s" }}
+                  aria-live="polite"
+                >
+                  <div className="countdown-box"><b>{countdown.d}</b><span>Days</span></div>
+                  <div className="countdown-box"><b>{countdown.h}</b><span>Hours</span></div>
+                  <div className="countdown-box"><b>{countdown.m}</b><span>Minutes</span></div>
+                  <div className="countdown-box"><b>{countdown.s}</b><span>Seconds</span></div>
+                </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 fade-up" style={{ animationDelay: ".22s" }}>
-              <button onClick={() => goTo("rsvp")} className="btn-primary px-6 py-3 rounded-full text-sm font-semibold">
-                Register your RSVP
-              </button>
-              <button
-                type="button"
-                onClick={addToCalendar}
-                className="btn-ghost px-6 py-3 rounded-full text-sm font-semibold inline-flex items-center gap-2"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" aria-hidden="true">
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <path d="M16 2v4M8 2v4M3 10h18" />
-                </svg>
-                Add to calendar
-              </button>
+                <div className="mt-9 sm:mt-10 lg:mt-8 soft-card rounded-[2rem] p-6 sm:p-10 max-w-2xl mx-auto lg:mx-0 reveal">
+                  <p className="text-[var(--ink-soft)] leading-7 text-center lg:center">
+                    To our beloved family and friends, we can’t wait to share our special day with you all
+                  </p>
+                  <p className="serif text-1xl sm:text-3xl mt-3 text-center lg:text-center">-Invitation to follow-</p>
+                </div>
+
+                <div
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 mt-7 sm:mt-8 fade-up max-w-sm sm:max-w-none mx-auto lg:mx-0"
+                  style={{ animationDelay: ".22s" }}
+                >
+                  <button onClick={() => goTo("rsvp")} className="btn-primary w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full text-sm font-semibold">
+                    Register your RSVP
+                  </button>
+                  <button
+                    type="button"
+                    onClick={addToCalendar}
+                    className="btn-ghost w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full text-sm font-semibold inline-flex items-center justify-center gap-2"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" aria-hidden="true">
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <path d="M16 2v4M8 2v4M3 10h18" />
+                    </svg>
+                    Add to calendar
+                  </button>
+                </div>
+              </div>
             </div>
           </section>
         )}
 
         {section === "rsvp" && (
           <section>
-            <div className="soft-card rounded-[2rem] p-6 sm:p-10 max-w-xl mx-auto reveal">
+            <div className="soft-card rounded-[2rem] p-5 sm:p-10 max-w-xl mx-auto reveal">
               <p className="section-title">RSVP</p>
-              <h2 className="serif text-3xl mt-2">Let us know you&rsquo;re coming</h2>
+              <h2 className="serif text-2xl sm:text-3xl mt-2">Let us know you&rsquo;re coming</h2>
               <p className="mt-2 text-sm text-[var(--muted)]">Please reply by 1 February 2027. All the finer details will follow closer to the day.</p>
 
-              <form className="form mt-7" onSubmit={handleSubmit} noValidate>
+              <form className="form mt-6 sm:mt-7" onSubmit={handleSubmit} noValidate>
                 <div className={`field mb-5 ${errors.name ? "invalid" : ""}`}>
                   <label htmlFor="name">Full name<span className="required">*</span></label>
                   <input
                     id="name"
                     type="text"
+                    inputMode="text"
                     placeholder="Chidinma Eze"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -210,6 +239,7 @@ export default function Home() {
                   <input
                     id="phone"
                     type="tel"
+                    inputMode="tel"
                     placeholder="+44 7700 900 442"
                     value={form.phone}
                     onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
@@ -223,6 +253,7 @@ export default function Home() {
                   <input
                     id="email"
                     type="email"
+                    inputMode="email"
                     placeholder="chidinma.eze@example.com"
                     value={form.email}
                     onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
@@ -238,7 +269,7 @@ export default function Home() {
                       { value: "yes", label: "✓ Yes, I'll be there" },
                       { value: "no", label: "✕ No, I can't make it" },
                     ].map((opt) => (
-                      <label key={opt.value}>
+                      <label key={opt.value} className="flex-1 sm:flex-none min-w-[min(100%,220px)] sm:min-w-0">
                         <input
                           type="radio"
                           name="attending"
@@ -246,17 +277,17 @@ export default function Home() {
                           checked={form.attending === opt.value}
                           onChange={() => setForm((f) => ({ ...f, attending: opt.value }))}
                         />
-                        <span className="opt">{opt.label}</span>
+                        <span className="opt justify-center sm:justify-start">{opt.label}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-7 flex items-center gap-3 flex-wrap">
-                  <button className="btn-primary px-6 py-3 rounded-full font-semibold disabled:opacity-60" type="submit" disabled={submitting}>
+                <div className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <button className="btn-primary w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full font-semibold disabled:opacity-60" type="submit" disabled={submitting}>
                     {submitting ? "Submitting…" : "Submit RSVP"}
                   </button>
-                  <button className="btn-ghost px-6 py-3 rounded-full font-semibold" type="button" onClick={resetForm}>Clear</button>
+                  <button className="btn-ghost w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full font-semibold" type="button" onClick={resetForm}>Clear</button>
                 </div>
 
                 {submitError && (
@@ -279,9 +310,9 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="footer max-w-6xl mx-auto px-4 sm:px-6 pb-10 pt-8">
+      <footer className="footer max-w-6xl mx-auto px-4 sm:px-6 pb-8 sm:pb-10 pt-8">
         <div className="rule mb-6"><span></span><span className="text-[var(--gold)]">&#10047;</span><span></span></div>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)] text-center sm:text-left">
           <span>#IfeNiyi2027</span>
           <button className="text-[var(--gold)] hover:text-[var(--ink)] transition" type="button" onClick={() => goTo("home")}>
             Back to top
