@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { supabase } from "../lib/supabaseClient";
 
 const WEDDING_DATE = new Date("2027-03-27T00:00:00");
 
@@ -21,20 +22,9 @@ function getCountdown() {
   };
 }
 
-// Loose but useful phone check: at least 7 digits, allows +, spaces, dashes, parens
-function isLikelyPhone(value) {
-  const digits = value.replace(/[^\d]/g, "");
-  return digits.length >= 7 && /^[\d\s()+-]+$/.test(value.trim());
-}
-
 export default function Home() {
   const [section, setSection] = useState("home");
   const [mobileOpen, setMobileOpen] = useState(false);
-  // Countdown must start as a placeholder on both server and client — the
-  // server can't know the client's exact clock, so computing a real value
-  // here causes a hydration mismatch (server "54s" vs client "51s").
-  // We compute the real value in useEffect below, which only runs after
-  // hydration, so React never compares mismatched numbers.
   const [countdown, setCountdown] = useState({ d: "–", h: "–", m: "–", s: "–" });
 
   const [form, setForm] = useState({
@@ -42,49 +32,17 @@ export default function Home() {
     phone: "",
     email: "",
     attending: "yes",
-    hp_check: "", // honeypot — real visitors leave this empty
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
-  const nameInputRef = useRef(null);
-  const mobileMenuRef = useRef(null);
-  const menuButtonRef = useRef(null);
-
   useEffect(() => {
-    setCountdown(getCountdown()); // set immediately, don't wait for first tick
+    setCountdown(getCountdown());
     const id = setInterval(() => setCountdown(getCountdown()), 1000);
     return () => clearInterval(id);
   }, []);
-
-  // Close the mobile menu on outside click or Escape.
-  useEffect(() => {
-    if (!mobileOpen) return;
-
-    function handlePointerDown(e) {
-      if (
-        mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(e.target) &&
-        menuButtonRef.current &&
-        !menuButtonRef.current.contains(e.target)
-      ) {
-        setMobileOpen(false);
-      }
-    }
-
-    function handleKeyDown(e) {
-      if (e.key === "Escape") setMobileOpen(false);
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [mobileOpen]);
 
   function goTo(id) {
     setSection(id);
@@ -96,52 +54,43 @@ export default function Home() {
     e.preventDefault();
     const nextErrors = {};
     if (!form.name.trim()) nextErrors.name = true;
-    if (!form.phone.trim() || !isLikelyPhone(form.phone)) nextErrors.phone = true;
+    if (!form.phone.trim()) nextErrors.phone = true;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) nextErrors.email = true;
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
+    if (!supabase) {
+      setSubmitError(
+        "RSVP storage isn't connected yet. Please add your Supabase credentials to .env.local — see README.md."
+      );
+      return;
+    }
+
     setSubmitting(true);
     setSubmitError(null);
 
-    try {
-      // Submitted through /api/rsvp (server-side rate limiting + honeypot
-      // check) instead of writing to Supabase directly from the browser.
-      const res = await fetch("/api/rsvp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          phone: form.phone.trim(),
-          email: form.email.trim(),
-          attending: form.attending,
-          hp_check: form.hp_check,
-        }),
-      });
+    const { error } = await supabase.from("rsvps").insert({
+      full_name: form.name.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+      attending: form.attending,
+    });
 
-      const data = await res.json().catch(() => ({}));
+    setSubmitting(false);
 
-      if (!res.ok) {
-        setSubmitError(data.error || "Something went wrong sending your RSVP — please try again in a moment.");
-        return;
-      }
-
-      setSubmitted(true);
-    } catch {
-      setSubmitError("Network error — please check your connection and try again.");
-    } finally {
-      setSubmitting(false);
+    if (error) {
+      setSubmitError("Something went wrong sending your RSVP — please try again in a moment.");
+      return;
     }
+
+    setSubmitted(true);
   }
 
   function resetForm() {
-    setForm({ name: "", phone: "", email: "", attending: "yes", hp_check: "" });
+    setForm({ name: "", phone: "", email: "", attending: "yes" });
     setErrors({});
     setSubmitted(false);
     setSubmitError(null);
-    // Return focus to the first field so keyboard/screen-reader users don't
-    // lose their place after clearing the form.
-    nameInputRef.current?.focus();
   }
 
   function addToCalendar() {
@@ -159,13 +108,6 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-20 gap-4">
             <div className="flex items-center gap-3">
-              <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">
-                <circle cx="23" cy="23" r="21" fill="#fffdf7" stroke="var(--gold)" strokeWidth="1.1" />
-                <circle cx="23" cy="23" r="17.5" fill="none" stroke="var(--gold-soft)" strokeWidth="1" strokeDasharray="4 6" />
-                <text x="23" y="28" textAnchor="middle" fontFamily="Playfair Display, serif" fontStyle="italic" fontSize="13" fill="var(--ink)">
-                  I&amp;N
-                </text>
-              </svg>
               <div>
                 <p className="serif text-lg sm:text-xl font-bold tracking-wide">Ife &amp; Niyi</p>
                 <p className="text-xs sm:text-sm text-[var(--muted)]">27 March 2027</p>
@@ -176,7 +118,6 @@ export default function Home() {
                 <button
                   key={item.id}
                   onClick={() => goTo(item.id)}
-                  aria-current={section === item.id ? "page" : undefined}
                   className={`nav-link px-4 py-2 rounded-full text-sm font-medium hover:bg-white/70 transition ${section === item.id ? "active" : ""}`}
                 >
                   {item.label}
@@ -184,28 +125,21 @@ export default function Home() {
               ))}
             </nav>
             <button
-              ref={menuButtonRef}
-              className="hamburger-btn md:hidden btn-ghost rounded-full"
+              className="md:hidden btn-ghost px-4 py-2 rounded-full text-sm font-semibold"
               onClick={() => setMobileOpen((v) => !v)}
               aria-expanded={mobileOpen}
               aria-controls="mobileMenu"
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
             >
-              <span className={`hamburger ${mobileOpen ? "open" : ""}`} aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
+              Menu
             </button>
           </div>
           {mobileOpen && (
-            <div id="mobileMenu" ref={mobileMenuRef} className="md:hidden pb-4">
+            <div id="mobileMenu" className="md:hidden pb-4">
               <div className="soft-card rounded-2xl p-3 flex flex-col gap-1">
                 {NAV_ITEMS.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => goTo(item.id)}
-                    aria-current={section === item.id ? "page" : undefined}
                     className={`nav-link text-left px-4 py-3 rounded-xl hover:bg-white transition ${section === item.id ? "active" : ""}`}
                   >
                     {item.label}
@@ -220,46 +154,25 @@ export default function Home() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
         {section === "home" && (
           <section className="text-center py-6 sm:py-10">
-            <div className="hero-photo-frame fade-up mb-16" style={{ animationDelay: ".05s" }}>
-              <img src="/couple.webp" alt="Ife and Niyi beneath a flower-covered arch at the beach" />
-              <div className="hero-photo-badge" aria-hidden="true">
-                <span>I&amp;N</span>
-              </div>
+            <div className="flyer-frame fade-up mb-9" style={{ animationDelay: ".05s" }}>
+              <img src="/image.png" alt="Save the date: Ife &amp; Niyi, Saturday 27 March 2027, Tirana, Albania. Invitation to follow." />
             </div>
 
-            <p className="section-title fade-up" style={{ animationDelay: ".1s" }}>Save the date</p>
-            <h1 className="serif text-4xl sm:text-6xl mt-4 fade-up" style={{ animationDelay: ".18s" }}>Ife &amp; Niyi</h1>
-            <p className="mt-4 text-base sm:text-lg text-[var(--ink-soft)] script fade-up" style={{ animationDelay: ".26s" }}>
-              are joyfully getting married
-            </p>
-
-            <div className="rule max-w-md mx-auto my-7 fade-up" style={{ animationDelay: ".32s" }}>
-              <span></span>
-              <span className="text-[var(--gold)]">&#10047;</span>
-              <span></span>
-            </div>
-
-            <div className="flex justify-center gap-3 sm:gap-4 flex-wrap fade-up" style={{ animationDelay: ".38s" }} aria-live="polite">
+            <div className="flex justify-center gap-3 sm:gap-4 flex-wrap fade-up" style={{ animationDelay: ".15s" }} aria-live="polite">
               <div className="countdown-box"><b>{countdown.d}</b><span>Days</span></div>
               <div className="countdown-box"><b>{countdown.h}</b><span>Hours</span></div>
               <div className="countdown-box"><b>{countdown.m}</b><span>Minutes</span></div>
               <div className="countdown-box"><b>{countdown.s}</b><span>Seconds</span></div>
             </div>
 
-            <div className="hero-meta fade-up" style={{ animationDelay: ".4s" }}>
-              <span>Saturday, 27 March 2027</span>
-              <span className="dot" aria-hidden="true"></span>
-              <span>RSVP by 1 February 2027</span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6 fade-up" style={{ animationDelay: ".46s" }}>
-              <button onClick={() => goTo("rsvp")} className="btn-primary px-7 py-3.5 rounded-full text-sm font-semibold">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 fade-up" style={{ animationDelay: ".22s" }}>
+              <button onClick={() => goTo("rsvp")} className="btn-primary px-6 py-3 rounded-full text-sm font-semibold">
                 Register your RSVP
               </button>
               <button
                 type="button"
                 onClick={addToCalendar}
-                className="btn-ghost px-7 py-3.5 rounded-full text-sm font-semibold inline-flex items-center gap-2"
+                className="btn-ghost px-6 py-3 rounded-full text-sm font-semibold inline-flex items-center gap-2"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" aria-hidden="true">
                   <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -267,14 +180,6 @@ export default function Home() {
                 </svg>
                 Add to calendar
               </button>
-            </div>
-
-            <div className="mt-10 soft-card rounded-[2rem] p-6 sm:p-10 max-w-2xl mx-auto reveal">
-              <p className="section-title text-center">Our celebration</p>
-              <h2 className="serif text-2xl sm:text-3xl mt-3 text-center">A beautiful day is coming</h2>
-              <p className="mt-4 text-[var(--ink-soft)] leading-7 text-center">
-                Join us as we begin our next chapter, surrounded by family and friends. Full details — venue, accommodation, and the rest of the celebration — will follow once we know who&rsquo;s able to join us. For now, please register your RSVP below.
-              </p>
             </div>
           </section>
         )}
@@ -291,12 +196,10 @@ export default function Home() {
                   <label htmlFor="name">Full name<span className="required">*</span></label>
                   <input
                     id="name"
-                    ref={nameInputRef}
                     type="text"
                     placeholder="Chidinma Eze"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    aria-invalid={errors.name ? "true" : "false"}
                     required
                   />
                   <span className="err-msg">Please enter your full name.</span>
@@ -310,10 +213,9 @@ export default function Home() {
                     placeholder="+44 7700 900 442"
                     value={form.phone}
                     onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                    aria-invalid={errors.phone ? "true" : "false"}
                     required
                   />
-                  <span className="err-msg">Please enter a valid phone number.</span>
+                  <span className="err-msg">Please enter your phone number.</span>
                 </div>
 
                 <div className={`field mb-5 ${errors.email ? "invalid" : ""}`}>
@@ -324,29 +226,9 @@ export default function Home() {
                     placeholder="chidinma.eze@example.com"
                     value={form.email}
                     onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                    aria-invalid={errors.email ? "true" : "false"}
                     required
                   />
                   <span className="err-msg">Please enter a valid email.</span>
-                </div>
-
-                {/* Honeypot field — hidden from real visitors via CSS, but a
-                    plain <input> so basic bots that auto-fill every form
-                    field tend to fill it in. Named/labeled generically (not
-                    "website"/"url"/"company") and marked autoComplete="off"
-                    plus a random-looking name so browser autofill doesn't
-                    populate it and create false positives. */}
-                <div style={{ position: "absolute", left: "-9999px", top: "auto", width: "1px", height: "1px", overflow: "hidden" }} aria-hidden="true">
-                  <label htmlFor="hp_check">Leave this field blank</label>
-                  <input
-                    id="hp_check"
-                    type="text"
-                    name="hp_check"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    value={form.hp_check}
-                    onChange={(e) => setForm((f) => ({ ...f, hp_check: e.target.value }))}
-                  />
                 </div>
 
                 <div className="field mt-5">
@@ -400,16 +282,15 @@ export default function Home() {
       <footer className="footer max-w-6xl mx-auto px-4 sm:px-6 pb-10 pt-8">
         <div className="rule mb-6"><span></span><span className="text-[var(--gold)]">&#10047;</span><span></span></div>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)]">
-          <span className="serif text-base text-[var(--ink)]">I &amp; N</span>
-          <span>With love, we can&rsquo;t wait to celebrate with you &middot; 27 March 2027</span>
-          <div className="flex items-center gap-4">
-            <button className="text-[var(--gold)] hover:text-[var(--ink)] transition" type="button" onClick={() => goTo("home")}>
-              Back to top
-            </button>
-            <Link href="/admin" className="text-[var(--muted)] hover:text-[var(--ink)] transition text-xs">
-              Admin
-            </Link>
-          </div>
+          <span>#IfeNiyi2027</span>
+          <button className="text-[var(--gold)] hover:text-[var(--ink)] transition" type="button" onClick={() => goTo("home")}>
+            Back to top
+          </button>
+        </div>
+        <div className="text-center mt-4">
+          <Link href="/dashboard/login" className="text-xs text-[var(--muted)] opacity-60 hover:opacity-100 transition">
+            Admin
+          </Link>
         </div>
       </footer>
     </>
