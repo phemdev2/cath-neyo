@@ -164,7 +164,7 @@ export default function Home() {
             <div className="hero-grid max-w-5xl mx-auto">
               <div className="flyer-frame fade-up" style={{ animationDelay: ".05s" }}>
                 <img
-                  src="/image.png"
+                  src="/ifeniyi.png"
                   alt="Save the date: Ife &amp; Niyi, Saturday 27 March 2027, Tirana, Albania. Invitation to follow."
                 />
               </div>
@@ -183,7 +183,7 @@ export default function Home() {
 
                 <div className="mt-9 sm:mt-10 lg:mt-8 soft-card rounded-[2rem] p-6 sm:p-10 max-w-2xl mx-auto lg:mx-0 reveal">
                   <p className="text-[var(--ink-soft)] leading-7 text-center lg:center">
-                    To our beloved family and friends, we can’t wait to share our special day with you all
+                    To our beloved family and friends, we can’t wait to share our special day with you all.
                   </p>
                   <p className="serif text-1xl sm:text-3xl mt-3 text-center lg:text-center">-Invitation to follow-</p>
                 </div>
@@ -217,7 +217,7 @@ export default function Home() {
             <div className="soft-card rounded-[2rem] p-5 sm:p-10 max-w-xl mx-auto reveal">
               <p className="section-title">RSVP</p>
               <h2 className="serif text-2xl sm:text-3xl mt-2">Let us know you&rsquo;re coming</h2>
-              <p className="mt-2 text-sm text-[var(--muted)]">Please reply by 1 February 2027. All the finer details will follow closer to the day.</p>
+              <p className="mt-2 text-sm text-[var(--muted)]">RSVP 30th September 2026. All the final details will follow closer to the day.</p>
 
               <form className="form mt-6 sm:mt-7" onSubmit={handleSubmit} noValidate>
                 <div className={`field mb-5 ${errors.name ? "invalid" : ""}`}>
@@ -226,7 +226,7 @@ export default function Home() {
                     id="name"
                     type="text"
                     inputMode="text"
-                    placeholder="Chidinma Eze"
+                    placeholder="Rachel &amp; David"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                     required
