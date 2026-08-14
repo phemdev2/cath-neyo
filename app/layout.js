@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Save the Date — Catherine & Niyi, 27 March 2027",
-  description: "Save the date and RSVP for Catherine and Niyi's wedding.",
+  title: "Save the Date — Ife & Niyi, 27 March 2027",
+  description: "To our beloved family and friends, we can’t wait to share our special day with you all",
 };
 
 export default function RootLayout({ children }) {
