@@ -1,5 +1,5 @@
 {
-  "name": "catherine-niyi-wedding",
+  "name": "ife-niyi-wedding",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,8 @@
     "@supabase/supabase-js": "^2.45.4",
     "next": "14.2.35",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "resend": "^4.8.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",

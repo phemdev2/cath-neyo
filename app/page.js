@@ -35,14 +35,21 @@ export default function Home() {
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [attendingStatus, setAttendingStatus] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [notification, setNotification] = useState(null); // { type: "error" | "success", message: string }
 
   useEffect(() => {
     setCountdown(getCountdown());
     const id = setInterval(() => setCountdown(getCountdown()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (!notification) return;
+    const id = setTimeout(() => setNotification(null), 5000);
+    return () => clearTimeout(id);
+  }, [notification]);
 
   function goTo(id) {
     setSection(id);
@@ -59,38 +66,82 @@ export default function Home() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    if (!supabase) {
-      setSubmitError(
-        "RSVP storage isn't connected yet. Please add your Supabase credentials to .env.local — see README.md."
-      );
-      return;
-    }
-
     setSubmitting(true);
-    setSubmitError(null);
+    setNotification(null);
 
-    const { error } = await supabase.from("rsvps").insert({
-      full_name: form.name.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      attending: form.attending,
-    });
+    // Bail out with a clear message instead of hanging forever if the
+    // network or the API route stalls.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    setSubmitting(false);
+    try {
+      const res = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: form.name.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim(),
+          attending: form.attending,
+        }),
+        signal: controller.signal,
+      });
 
-    if (error) {
-      setSubmitError("Something went wrong sending your RSVP — please try again in a moment.");
-      return;
+      if (!res.ok) {
+        // Expect the API route to respond 409 with
+        // { code: "duplicate", field: "email" | "phone" } when the
+        // person has already RSVP'd with that email or phone number.
+        const data = await res.json().catch(() => ({}));
+
+        if (res.status === 409 || data.code === "duplicate") {
+          setNotification({
+            type: "error",
+            message:
+              data.field === "phone"
+                ? "That phone number has already been used for an RSVP."
+                : "That email address has already been used for an RSVP.",
+          });
+        } else {
+          setNotification({
+            type: "error",
+            message: data.error || "Something went wrong sending your RSVP — please try again in a moment.",
+          });
+        }
+        return;
+      }
+
+      // Save their choice before clearing the form fields
+      setAttendingStatus(form.attending);
+      
+      setSubmitted(true);
+      clearFormFields();
+      setNotification({ type: "success", message: "Your RSVP has been received!" });
+    } catch (err) {
+      setNotification({
+        type: "error",
+        message:
+          err.name === "AbortError"
+            ? "That took too long to send — please check your connection and try again."
+            : "Something went wrong sending your RSVP — please try again in a moment.",
+      });
+    } finally {
+      clearTimeout(timeoutId);
+      setSubmitting(false);
     }
+  }
 
-    setSubmitted(true);
+  // Clears just the input fields, leaving submitted/notification state alone
+  // so the confirmation message (or an error toast) stays visible.
+  function clearFormFields() {
+    setForm({ name: "", phone: "", email: "", attending: "yes" });
+    setErrors({});
   }
 
   function resetForm() {
-    setForm({ name: "", phone: "", email: "", attending: "yes" });
-    setErrors({});
+    clearFormFields();
     setSubmitted(false);
-    setSubmitError(null);
+    setAttendingStatus(null);
+    setNotification(null);
   }
 
   function addToCalendar() {
@@ -104,6 +155,44 @@ export default function Home() {
 
   return (
     <>
+      {notification && (
+        <div
+          className="fixed top-4 right-4 left-4 sm:left-auto sm:w-96 z-[100]"
+          role="status"
+          aria-live="assertive"
+        >
+          <div
+            className={`flex items-start gap-3 rounded-2xl px-4 py-3.5 shadow-lg border ${
+              notification.type === "success"
+                ? "bg-[#f2f7f3] border-[#c9dccd] text-[#3d5a43]"
+                : "bg-[#fbf1ef] border-[#e6c7c1] text-[#8f3f38]"
+            }`}
+          >
+            {notification.type === "success" ? (
+              <svg width="20" height="20" viewBox="0 0 26 26" className="flex-shrink-0 mt-0.5" aria-hidden="true">
+                <circle cx="13" cy="13" r="12" fill="none" stroke="#4f7457" strokeWidth="1.6" />
+                <path d="M7 13.5l4 4 8-9" fill="none" stroke="#4f7457" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 26 26" className="flex-shrink-0 mt-0.5" aria-hidden="true">
+                <circle cx="13" cy="13" r="12" fill="none" stroke="#a13f3a" strokeWidth="1.6" />
+                <path d="M13 7v7" stroke="#a13f3a" strokeWidth="1.8" strokeLinecap="round" />
+                <circle cx="13" cy="17.5" r="1.1" fill="#a13f3a" />
+              </svg>
+            )}
+            <p className="text-sm leading-5 flex-1">{notification.message}</p>
+            <button
+              type="button"
+              onClick={() => setNotification(null)}
+              aria-label="Dismiss notification"
+              className="flex-shrink-0 opacity-60 hover:opacity-100 transition text-sm leading-5"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       <header className="nav nav-blur sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
@@ -182,10 +271,10 @@ export default function Home() {
                 </div>
 
                 <div className="mt-9 sm:mt-10 lg:mt-8 soft-card rounded-[2rem] p-6 sm:p-10 max-w-2xl mx-auto lg:mx-0 reveal">
-                  <p className="text-[var(--ink-soft)] leading-7 text-center lg:center">
+                  <p className="text-[var(--ink-soft)] leading-7 text-center lg:text-left">
                     To our beloved family and friends, we can’t wait to share our special day with you all.
                   </p>
-                  <p className="serif text-1xl sm:text-3xl mt-3 text-center lg:text-center">-Invitation to follow-</p>
+                  <p className="serif text-xl sm:text-3xl mt-3 text-center lg:text-left">-Invitation to follow-</p>
                 </div>
 
                 <div
@@ -291,9 +380,6 @@ export default function Home() {
                   <button className="btn-ghost w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full font-semibold" type="button" onClick={resetForm}>Clear</button>
                 </div>
 
-                {submitError && (
-                  <p className="mt-4 text-sm text-[#a13f3a]" role="alert">{submitError}</p>
-                )}
               </form>
 
               <div className={`confirmation items-start gap-3 ${submitted ? "show" : ""}`} role="status">
@@ -302,8 +388,17 @@ export default function Home() {
                   <path d="M7 13.5l4 4 8-9" fill="none" stroke="#4f7457" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <div>
-                  <h3 className="serif text-2xl">Thank you for registering!</h3>
-                  <p className="mt-1 text-[var(--ink-soft)]">Your reply has been noted. Full wedding details will be shared closer to the day.</p>
+                  {attendingStatus === "no" ? (
+                    <>
+                      <h3 className="serif text-2xl">Sorry we’ll miss you!</h3>
+                      <p className="mt-1 text-[var(--ink-soft)]">Thank you for letting us know — we’ll miss having you with us on the day, but we truly appreciate your response.</p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="serif text-2xl">Thank you for registering!</h3>
+                      <p className="mt-1 text-[var(--ink-soft)]">Your reply has been noted. Full wedding details will be shared closer to the day.</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

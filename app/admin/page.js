@@ -210,7 +210,7 @@ export default function AdminDashboard() {
   if (!supabase) {
     return (
       <main className="max-w-xl mx-auto px-4 py-24 text-center text-[var(--muted)]">
-        Supabase isn't connected yet. Please add your credentials to .env.local — see README.md.
+        Supabase isn&rsquo;t connected yet. Please add your credentials to .env.local — see README.md.
       </main>
     );
   }
@@ -247,19 +247,19 @@ export default function AdminDashboard() {
     });
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-      <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-14">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <p className="section-title">Admin</p>
-          <h1 className="serif text-3xl sm:text-4xl mt-2">RSVP dashboard</h1>
+          <h1 className="serif text-2xl sm:text-4xl mt-2">RSVP dashboard</h1>
           {userEmail && (
-            <p className="mt-1 text-sm text-[var(--muted)]">Signed in as {userEmail}</p>
+            <p className="mt-1 text-sm text-[var(--muted)] break-all">Signed in as {userEmail}</p>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <a
             href="/"
-            className="btn-ghost px-5 py-2.5 rounded-full text-sm font-semibold inline-flex items-center gap-2"
+            className="btn-ghost px-5 py-2.5 rounded-full text-sm font-semibold inline-flex items-center justify-center gap-2"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M3 11l9-8 9 8" strokeLinecap="round" strokeLinejoin="round" />
@@ -273,20 +273,20 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="flex gap-3 sm:gap-4 flex-wrap mb-10">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10">
         <div className="countdown-box"><b>{total}</b><span>Total RSVPs</span></div>
         <div className="countdown-box"><b>{yesCount}</b><span>Attending</span></div>
         <div className="countdown-box"><b>{noCount}</b><span>Not attending</span></div>
       </div>
 
-      <div className="soft-card rounded-[2rem] p-6 sm:p-10 reveal">
-        <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
+      <div className="soft-card rounded-[2rem] p-4 sm:p-10 reveal">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
           <div>
             <p className="section-title">Responses</p>
-            <h2 className="serif text-2xl mt-2">All replies</h2>
+            <h2 className="serif text-xl sm:text-2xl mt-2">All replies</h2>
           </div>
           <button
-            className="btn-ghost px-5 py-2.5 rounded-full text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50"
+            className="btn-ghost w-full sm:w-auto px-5 py-2.5 rounded-full text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50"
             onClick={handleExportCsv}
             disabled={visibleRsvps.length === 0}
           >
@@ -298,36 +298,37 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap mb-6 mt-4">
+        <div className="flex flex-col gap-3 mb-6 mt-4">
           <input
             type="text"
-            className="edit-input"
-            style={{ maxWidth: "260px" }}
+            className="edit-input w-full sm:max-w-[260px]"
             placeholder="Search name, email, or phone…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <div className="radio-row" role="radiogroup" aria-label="Filter by attendance">
-            {[
-              { value: "all", label: "All" },
-              { value: "yes", label: "Attending" },
-              { value: "no", label: "Not attending" },
-            ].map((opt) => (
-              <label key={opt.value}>
-                <input
-                  type="radio"
-                  name="attendingFilter"
-                  value={opt.value}
-                  checked={attendingFilter === opt.value}
-                  onChange={() => setAttendingFilter(opt.value)}
-                />
-                <span className="opt">{opt.label}</span>
-              </label>
-            ))}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="radio-row" role="radiogroup" aria-label="Filter by attendance">
+              {[
+                { value: "all", label: "All" },
+                { value: "yes", label: "Attending" },
+                { value: "no", label: "Not attending" },
+              ].map((opt) => (
+                <label key={opt.value}>
+                  <input
+                    type="radio"
+                    name="attendingFilter"
+                    value={opt.value}
+                    checked={attendingFilter === opt.value}
+                    onChange={() => setAttendingFilter(opt.value)}
+                  />
+                  <span className="opt">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            <span className="text-xs text-[var(--muted)] whitespace-nowrap">
+              Showing {visibleRsvps.length} of {total}
+            </span>
           </div>
-          <span className="text-xs text-[var(--muted)]">
-            Showing {visibleRsvps.length} of {total}
-          </span>
         </div>
 
         {loading && <p className="text-[var(--muted)]">Loading responses…</p>}
@@ -342,8 +343,8 @@ export default function AdminDashboard() {
         )}
 
         {!loading && !error && visibleRsvps.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="rsvp-table-scroll">
+            <table className="rsvp-table w-full text-sm text-left">
               <thead>
                 <tr className="border-b border-[var(--gold-soft)] text-[var(--muted)]">
                   <th className="py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("full_name")}>
@@ -358,7 +359,7 @@ export default function AdminDashboard() {
                   <th className="py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("attending")}>
                     Attending{sortIndicator("attending")}
                   </th>
-                  <th className="py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
+                  <th className="hidden sm:table-cell py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
                     Submitted{sortIndicator("created_at")}
                   </th>
                   <th className="py-2 pr-4 font-medium">Actions</th>
@@ -371,7 +372,7 @@ export default function AdminDashboard() {
                     <tr key={r.id} className="border-b border-[var(--gold-soft)]/40 align-top">
                       {isEditing ? (
                         <>
-                          <td className="py-3 pr-4">
+                          <td className="py-3 pr-4" data-label="Name">
                             <input
                               className="edit-input"
                               type="text"
@@ -379,7 +380,7 @@ export default function AdminDashboard() {
                               onChange={(e) => setEditForm((f) => ({ ...f, full_name: e.target.value }))}
                             />
                           </td>
-                          <td className="py-3 pr-4">
+                          <td className="py-3 pr-4" data-label="Phone">
                             <input
                               className="edit-input"
                               type="tel"
@@ -387,7 +388,7 @@ export default function AdminDashboard() {
                               onChange={(e) => setEditForm((f) => ({ ...f, phone: e.target.value }))}
                             />
                           </td>
-                          <td className="py-3 pr-4">
+                          <td className="py-3 pr-4" data-label="Email">
                             <input
                               className="edit-input"
                               type="email"
@@ -395,7 +396,7 @@ export default function AdminDashboard() {
                               onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
                             />
                           </td>
-                          <td className="py-3 pr-4">
+                          <td className="py-3 pr-4" data-label="Attending">
                             <select
                               className="edit-input"
                               value={editForm.attending}
@@ -405,21 +406,21 @@ export default function AdminDashboard() {
                               <option value="no">No</option>
                             </select>
                           </td>
-                          <td className="py-3 pr-4 text-[var(--muted)]">
+                          <td className="hidden sm:table-cell py-3 pr-4 text-[var(--muted)]" data-label="Submitted">
                             {r.created_at ? new Date(r.created_at).toLocaleString() : "—"}
                           </td>
-                          <td className="py-3 pr-4">
+                          <td className="py-3 pr-4" data-label="Actions">
                             <div className="flex flex-col gap-2 items-start">
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 w-full">
                                 <button
-                                  className="btn-primary px-3 py-1.5 rounded-full text-xs font-semibold disabled:opacity-60"
+                                  className="btn-primary px-3 py-2 sm:py-1.5 rounded-full text-xs font-semibold disabled:opacity-60 flex-1 sm:flex-none"
                                   onClick={() => saveEdit(r.id)}
                                   disabled={savingEdit}
                                 >
                                   {savingEdit ? "Saving…" : "Save"}
                                 </button>
                                 <button
-                                  className="btn-ghost px-3 py-1.5 rounded-full text-xs font-semibold"
+                                  className="btn-ghost px-3 py-2 sm:py-1.5 rounded-full text-xs font-semibold flex-1 sm:flex-none"
                                   onClick={cancelEdit}
                                   disabled={savingEdit}
                                 >
@@ -434,28 +435,28 @@ export default function AdminDashboard() {
                         </>
                       ) : (
                         <>
-                          <td className="py-3 pr-4">{r.full_name}</td>
-                          <td className="py-3 pr-4">{r.phone}</td>
-                          <td className="py-3 pr-4">{r.email}</td>
-                          <td className="py-3 pr-4">
+                          <td className="py-3 pr-4" data-label="Name">{r.full_name}</td>
+                          <td className="py-3 pr-4" data-label="Phone">{r.phone}</td>
+                          <td className="py-3 pr-4 break-all" data-label="Email">{r.email}</td>
+                          <td className="py-3 pr-4" data-label="Attending">
                             <span className={`pill px-3 py-1 rounded-full text-xs font-semibold ${r.attending === "yes" ? "" : "opacity-70"}`}>
                               {r.attending === "yes" ? "✓ Yes" : "✕ No"}
                             </span>
                           </td>
-                          <td className="py-3 pr-4 text-[var(--muted)]">
+                          <td className="hidden sm:table-cell py-3 pr-4 text-[var(--muted)]" data-label="Submitted">
                             {r.created_at ? new Date(r.created_at).toLocaleString() : "—"}
                           </td>
-                          <td className="py-3 pr-4">
+                          <td className="py-3 pr-4" data-label="Actions">
                             <div className="flex flex-col gap-2 items-start">
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 w-full">
                                 <button
-                                  className="btn-ghost px-3 py-1.5 rounded-full text-xs font-semibold"
+                                  className="btn-ghost px-3 py-2 sm:py-1.5 rounded-full text-xs font-semibold flex-1 sm:flex-none"
                                   onClick={() => startEdit(r)}
                                 >
                                   Edit
                                 </button>
                                 <button
-                                  className="btn-ghost px-3 py-1.5 rounded-full text-xs font-semibold text-[#a13f3a] disabled:opacity-60"
+                                  className="btn-ghost px-3 py-2 sm:py-1.5 rounded-full text-xs font-semibold text-[#a13f3a] disabled:opacity-60 flex-1 sm:flex-none"
                                   onClick={() => handleDelete(r.id)}
                                   disabled={deletingId === r.id}
                                 >

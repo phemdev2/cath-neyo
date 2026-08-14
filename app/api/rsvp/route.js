@@ -1,76 +1,19 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "../../../lib/supabaseAdmin";
+import { supabase } from "../../../lib/supabaseClient";
+import { getResend } from "../../../lib/resend";
 
-// --- In-memory rate limiter -------------------------------------------------
-// Caveat: this only works reliably on a single long-running Node process.
-// If this app runs on a serverless platform (e.g. Vercel) where requests can
-// land on different instances, this Map isn't shared across them, so the
-// limit becomes "per warm instance" rather than a true global limit. It's
-// still useful as a first line of defense and works perfectly on a
-// traditional always-on Node server. For a serverless deployment that needs
-// a hard guarantee, swap this for a shared store like Upstash Redis or
-// Vercel KV — happy to wire that up if that's how this is hosted.
-const WINDOW_MS = 60 * 60 * 1000; // 1 hour window
-const MAX_PER_WINDOW = 5; // max submissions per IP per window
-const MIN_INTERVAL_MS = 15 * 1000; // min gap between submissions per IP
-
-const hits = new Map(); // ip -> array of submission timestamps (ms)
-
-function getClientIp(request) {
-  const fwd = request.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return request.headers.get("x-real-ip") || "unknown";
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const timestamps = (hits.get(ip) || []).filter((t) => now - t < WINDOW_MS);
-
-  if (
-    timestamps.length > 0 &&
-    now - timestamps[timestamps.length - 1] < MIN_INTERVAL_MS
-  ) {
-    return { allowed: false, reason: "too_fast" };
-  }
-  if (timestamps.length >= MAX_PER_WINDOW) {
-    return { allowed: false, reason: "too_many" };
-  }
-
-  timestamps.push(now);
-  hits.set(ip, timestamps);
-  return { allowed: true };
-}
-
-// Periodic cleanup so `hits` doesn't grow forever on a long-running server.
-let cleanupTimer = null;
-function ensureCleanupTimer() {
-  if (cleanupTimer) return;
-  cleanupTimer = setInterval(() => {
-    const now = Date.now();
-    for (const [ip, timestamps] of hits.entries()) {
-      const fresh = timestamps.filter((t) => now - t < WINDOW_MS);
-      if (fresh.length === 0) hits.delete(ip);
-      else hits.set(ip, fresh);
-    }
-  }, WINDOW_MS);
-  cleanupTimer.unref?.();
-}
-ensureCleanupTimer();
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Postgres unique-violation error code.
+const UNIQUE_VIOLATION = "23505";
 
 export async function POST(request) {
-  const ip = getClientIp(request);
-  const { allowed, reason } = checkRateLimit(ip);
-
-  if (!allowed) {
-    const message =
-      reason === "too_fast"
-        ? "You're submitting too quickly — please wait a moment and try again."
-        : "Too many RSVP attempts from this connection. Please try again later.";
-    return NextResponse.json({ error: message }, { status: 429 });
-  }
-
   let body;
   try {
     body = await request.json();
@@ -78,49 +21,101 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const { name, phone, email, attending, hp_check } = body || {};
+  const full_name = (body.full_name || "").trim();
+  const phone = (body.phone || "").trim();
+  const email = (body.email || "").trim();
+  const attending = body.attending === "no" ? "no" : "yes";
 
-  // Honeypot: a hidden field real visitors never see or fill in, but bots
-  // that auto-fill every form field often do. Named something generic
-  // (not "website"/"url"/"company") specifically so browser autofill
-  // doesn't accidentally populate it and cause false positives. Report
-  // fake success so bots don't learn the honeypot was tripped.
-  if (hp_check) {
-    return NextResponse.json({ ok: true });
-  }
-
-  if (!name || !name.trim()) {
-    return NextResponse.json({ error: "Please enter your full name." }, { status: 400 });
-  }
-  if (!phone || !phone.trim()) {
-    return NextResponse.json({ error: "Please enter your phone number." }, { status: 400 });
-  }
-  if (!email || !EMAIL_RE.test(email.trim())) {
-    return NextResponse.json({ error: "Please enter a valid email." }, { status: 400 });
-  }
-  if (attending !== "yes" && attending !== "no") {
-    return NextResponse.json({ error: "Invalid attendance value." }, { status: 400 });
-  }
-
-  if (!supabaseAdmin) {
+  if (!full_name || !phone || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
-      { error: "RSVP storage isn't connected yet. Please add your Supabase credentials to .env.local — see README.md." },
+      { error: "Please provide a valid name, phone number, and email." },
+      { status: 400 }
+    );
+  }
+
+  if (!supabase) {
+    return NextResponse.json(
+      { error: "RSVP storage isn't connected yet. Add Supabase credentials to .env.local." },
       { status: 500 }
     );
   }
 
-  const { error } = await supabaseAdmin.from("rsvps").insert({
-    full_name: name.trim(),
-    phone: phone.trim(),
-    email: email.trim(),
+  const { error: dbError } = await supabase.from("rsvps").insert({
+    full_name,
+    phone,
+    email,
     attending,
   });
 
-  if (error) {
+  if (dbError) {
+    // Catching the unique constraint violation here allows us to send
+    // a specific 409 status code that your frontend knows how to handle.
+    if (dbError.code === UNIQUE_VIOLATION) {
+      const message = dbError.message || "";
+      const field = message.includes("phone") ? "phone" : "email";
+      return NextResponse.json(
+        { code: "duplicate", field },
+        { status: 409 }
+      );
+    }
+
+    console.error("RSVP insert failed:", dbError);
     return NextResponse.json(
-      { error: "Something went wrong sending your RSVP — please try again in a moment." },
+      { error: "Something went wrong saving your RSVP — please try again." },
       { status: 500 }
     );
+  }
+
+  // From here on, the RSVP is safely saved. Email is a nice-to-have, so
+  // failures here are logged but never turn a successful RSVP into an
+  // error response for the guest.
+  const resend = getResend();
+  if (resend) {
+    const notifyEmail = process.env.NOTIFY_EMAIL;
+    const fromEmail = process.env.RESEND_FROM_EMAIL || "RSVP <onboarding@resend.dev>";
+    const attendingLabel = attending === "yes" ? "Yes, attending" : "Not attending";
+
+    const tasks = [];
+
+    if (notifyEmail) {
+      tasks.push(
+        resend.emails.send({
+          from: fromEmail,
+          to: notifyEmail,
+          subject: `New RSVP: ${full_name} (${attendingLabel})`,
+          html: `
+            <p>A new RSVP just came in:</p>
+            <ul>
+              <li><strong>Name:</strong> ${escapeHtml(full_name)}</li>
+              <li><strong>Phone:</strong> ${escapeHtml(phone)}</li>
+              <li><strong>Email:</strong> ${escapeHtml(email)}</li>
+              <li><strong>Attending:</strong> ${attendingLabel}</li>
+            </ul>
+          `,
+        })
+      );
+    }
+
+    tasks.push(
+      resend.emails.send({
+        from: fromEmail,
+        to: email,
+        subject: "We've received your RSVP — Ife & Niyi, 27 March 2027",
+        html: `
+          <p>Hi ${escapeHtml(full_name)},</p>
+          <p>Thank you for registering your RSVP for Ife &amp; Niyi's wedding on <strong>27 March 2027</strong>.</p>
+          <p>We've noted that you're <strong>${attendingLabel.toLowerCase()}</strong>. Full details — venue, accommodation, and the rest of the celebration — will follow closer to the day.</p>
+          <p>With love,<br />Ife &amp; Niyi</p>
+        `,
+      })
+    );
+
+    const results = await Promise.allSettled(tasks);
+    results.forEach((r) => {
+      if (r.status === "rejected") {
+        console.error("RSVP email failed to send:", r.reason);
+      }
+    });
   }
 
   return NextResponse.json({ ok: true });

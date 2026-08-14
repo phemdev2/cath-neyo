@@ -214,12 +214,14 @@ body {
 .radio-row .opt {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.75);
   padding: 0.85rem 1.1rem;
   border-radius: 999px;
   cursor: pointer;
+  white-space: nowrap;
   transition: transform 0.18s ease, background 0.2s ease, border-color 0.2s ease,
     color 0.2s ease;
   font-weight: 600;
@@ -384,6 +386,69 @@ body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--gold-soft);
+}
+
+.edit-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 16px; /* prevents iOS Safari auto-zoom on focus */
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.edit-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(169, 123, 52, 0.13);
+}
+
+.rsvp-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 1.1rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.6);
+}
+@media (min-width: 900px) {
+  .rsvp-table-scroll {
+    border-radius: 1.4rem;
+  }
+}
+
+.rsvp-table {
+  border-collapse: collapse;
+  min-width: 640px; /* keeps real rows/columns on mobile — scrolls sideways instead of stacking */
+  width: 100%;
+}
+.rsvp-table th,
+.rsvp-table td {
+  padding: 0.7rem 0.9rem;
+  white-space: nowrap;
+}
+@media (min-width: 640px) {
+  .rsvp-table th,
+  .rsvp-table td {
+    padding: 0.9rem 1.25rem;
+  }
+}
+
+/* Pin the first column (Name) so it stays visible while the rest of
+   the row scrolls sideways underneath it — keeps each row's identity
+   in view without needing to stack fields vertically. */
+.rsvp-table th:first-child,
+.rsvp-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  white-space: normal;
+  box-shadow: 2px 0 6px rgba(28, 43, 34, 0.06);
+}
+.rsvp-table thead th:first-child {
+  background: rgba(255, 250, 238, 0.98);
+}
+.rsvp-table tbody td:first-child {
+  background: #fff;
 }
 
 .print-only {

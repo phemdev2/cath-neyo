@@ -6,7 +6,7 @@ import { supabase } from "../../../lib/supabaseClient";
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -39,14 +39,21 @@ export default function AdminLogin() {
     }
 
     setLoading(true);
+
+    // The trick: convert the username into a fake email format 
+    // that Supabase will accept.
+    const cleanUsername = username.trim().toLowerCase().replace(/\s+/g, "");
+    const fakeEmail = `${cleanUsername}@ifeniyi.admin`;
+
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: fakeEmail,
       password,
     });
+    
     setLoading(false);
 
     if (signInError) {
-      setError("Incorrect email or password.");
+      setError("Incorrect username or password.");
       return;
     }
 
@@ -71,14 +78,15 @@ export default function AdminLogin() {
         </p>
 
         <form className="form mt-7" onSubmit={handleSubmit} noValidate>
+          {/* Changed from Email to Username */}
           <div className="field mb-5">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="username">Username</label>
             <input
-              id="email"
-              type="email"
+              id="username"
+              type="text"
               autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
