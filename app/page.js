@@ -193,7 +193,7 @@ export default function Home() {
                   style={{ animationDelay: ".22s" }}
                 >
                   <button onClick={() => goTo("rsvp")} className="btn-primary w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full text-sm font-semibold">
-                    Register your RSVP
+                   Register your RSVP by 30th September 2026.
                   </button>
                   <button
                     type="button"
