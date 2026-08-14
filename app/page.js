@@ -218,7 +218,7 @@ export default function Home() {
             <div className="soft-card rounded-[2rem] p-5 sm:p-10 max-w-xl mx-auto reveal">
               <p className="section-title">RSVP</p>
               <h2 className="serif text-2xl sm:text-3xl mt-2">Let us know you&rsquo;re coming</h2>
-              <p className="mt-2 text-sm text-[var(--muted)]">RSVP 30th September 2026. All the final details will follow closer to the day.</p>
+              <p className="mt-2 text-sm text-[var(--muted)]">RSVP by 30 September 2026. All final details will follow closer to the day.</p>
 
               <form className="form mt-6 sm:mt-7" onSubmit={handleSubmit} noValidate>
                 <div className={`field mb-5 ${errors.name ? "invalid" : ""}`}>
@@ -320,7 +320,7 @@ export default function Home() {
           </button>
         </div>
         <div className="text-center mt-4">
-          <Link href="/dashboard/login" className="text-xs text-[var(--muted)] opacity-60 hover:opacity-100 transition">
+          <Link href="/admin" className="text-xs text-[var(--muted)] opacity-60 hover:opacity-100 transition">
             Admin
           </Link>
         </div>
