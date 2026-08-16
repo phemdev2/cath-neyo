@@ -270,12 +270,21 @@ export default function Home() {
                   <div className="countdown-box"><b>{countdown.s}</b><span>Seconds</span></div>
                 </div>
 
-                <div className="mt-9 sm:mt-10 lg:mt-8 soft-card rounded-[2rem] p-6 sm:p-10 max-w-2xl mx-auto lg:mx-0 reveal">
-                  <p className="text-[var(--ink-soft)] leading-7 text-center lg:text-left">
-                    To our beloved family and friends, we can’t wait to share our special day with you all.
-                  </p>
-                  <p className="serif text-xl sm:text-3xl mt-3 text-center lg:text-left">-Invitation to follow-</p>
-                </div>
+          <div className="mt-9 sm:mt-10 lg:mt-8 soft-card rounded-[2rem] p-6 sm:p-10 max-w-2xl mx-auto lg:mx-0 reveal">
+  <p className="text-[var(--ink-soft)] leading-7 text-center lg:text-left">
+    To our beloved family and friends, we can’t wait to share our special day with you all.
+  </p>
+  <p className="serif text-xl sm:text-3xl mt-3 text-center lg:text-left">-Invitation to follow-</p>
+
+  <div className="mt-6 pt-4 border-t border-[var(--gold)]/25">
+    <p className="text-[11px] sm:text-xs tracking-[0.15em] uppercase text-[var(--gold)] font-semibold text-center lg:text-left">
+      Please Note
+    </p>
+    <p className="mt-1.5 text-xs sm:text-sm text-[var(--muted)] leading-relaxed text-center lg:text-left">
+      As much as we love children, we're unable to accommodate them on this occasion — this is an adult-only event.
+    </p>
+  </div>
+</div>
 
                 <div
                   className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 mt-7 sm:mt-8 fade-up max-w-sm sm:max-w-none mx-auto lg:mx-0"
