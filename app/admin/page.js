@@ -10,6 +10,8 @@ export default function AdminDashboard() {
   const [userEmail, setUserEmail] = useState(null);
 
   const [rsvps, setRsvps] = useState([]);
+  const [events, setEvents] = useState({}); // schedule_rsvps rows keyed by lowercase email
+  const [eventsError, setEventsError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,7 +24,7 @@ export default function AdminDashboard() {
   const [rowError, setRowError] = useState({});
 
   const [search, setSearch] = useState("");
-  const [attendingFilter, setAttendingFilter] = useState("all"); // all | yes | no
+  const [attendingFilter, setAttendingFilter] = useState("all"); // all | yes | no | pending
   const [sortKey, setSortKey] = useState("created_at");
   const [sortDir, setSortDir] = useState("desc"); // asc | desc
 
@@ -51,13 +53,15 @@ export default function AdminDashboard() {
     return () => listener.subscription.unsubscribe();
   }, [router]);
 
-  // Fetch RSVPs once we know we're signed in.
+  // Fetch RSVPs and event replies once we know we're signed in.
   useEffect(() => {
     if (checkingSession || !supabase) return;
 
-    async function fetchRsvps() {
+    async function fetchAll() {
       setLoading(true);
       setError(null);
+      setEventsError(null);
+
       const { data, error: fetchError } = await supabase
         .from("rsvps")
         .select("*")
@@ -68,16 +72,52 @@ export default function AdminDashboard() {
       } else {
         setRsvps(data || []);
       }
+
+      // Event replies are loaded separately so a problem here never hides the RSVP list.
+      const { data: evData, error: evError } = await supabase
+        .from("schedule_rsvps")
+        .select("*");
+
+      if (evError) {
+        console.error("schedule_rsvps load failed:", evError);
+        setEventsError(
+          "Couldn't load event replies. Check that the admin read policy exists on schedule_rsvps."
+        );
+      } else {
+        const map = {};
+        (evData || []).forEach((row) => {
+          map[String(row.email || "").trim().toLowerCase()] = row;
+        });
+        setEvents(map);
+      }
+
       setLoading(false);
     }
 
-    fetchRsvps();
+    fetchAll();
   }, [checkingSession]);
 
   async function handleSignOut() {
     if (!supabase) return;
     await supabase.auth.signOut();
     router.replace("/admin/login");
+  }
+
+  function getEvent(r) {
+    return events[String(r.email || "").trim().toLowerCase()];
+  }
+
+  // "✓" yes, "✕" no, "—" hasn't replied to the event form
+  function eventMark(r, key) {
+    const ev = getEvent(r);
+    if (!ev) return "—";
+    return ev[key] ? "✓" : "✕";
+  }
+
+  function eventWord(r, key) {
+    const ev = getEvent(r);
+    if (!ev) return "";
+    return ev[key] ? "Yes" : "No";
   }
 
   function startEdit(r) {
@@ -174,12 +214,24 @@ export default function AdminDashboard() {
   }
 
   function handleExportCsv() {
-    const headers = ["Name", "Phone", "Email", "Attending", "Submitted"];
+    const headers = [
+      "Name",
+      "Phone",
+      "Email",
+      "Attending",
+      "Fri Welcome",
+      "Fri OMA Lounge",
+      "Sun Brunch",
+      "Submitted",
+    ];
     const rows = visibleRsvps.map((r) => [
       r.full_name,
       r.phone,
       r.email,
       r.attending === "yes" ? "Yes" : "No",
+      eventWord(r, "welcome"),
+      eventWord(r, "oma"),
+      eventWord(r, "brunch"),
       r.created_at ? new Date(r.created_at).toLocaleString() : "",
     ]);
 
@@ -219,9 +271,18 @@ export default function AdminDashboard() {
   const yesCount = rsvps.filter((r) => r.attending === "yes").length;
   const noCount = rsvps.filter((r) => r.attending === "no").length;
 
+  // Event stats are counted among attending guests only.
+  const attendingRows = rsvps.filter((r) => r.attending === "yes");
+  const repliedCount = attendingRows.filter((r) => getEvent(r)).length;
+  const eventYes = (key) => attendingRows.filter((r) => getEvent(r)?.[key]).length;
+
   const visibleRsvps = rsvps
     .filter((r) => {
-      if (attendingFilter !== "all" && r.attending !== attendingFilter) return false;
+      if (attendingFilter === "pending") {
+        if (!(r.attending === "yes" && !getEvent(r))) return false;
+      } else if (attendingFilter !== "all" && r.attending !== attendingFilter) {
+        return false;
+      }
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         const haystack = `${r.full_name || ""} ${r.email || ""} ${r.phone || ""}`.toLowerCase();
@@ -247,7 +308,7 @@ export default function AdminDashboard() {
     });
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-14">
+    <main className="max-w-[1400px] mx-auto px-3 sm:px-6 py-6 sm:py-14">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <p className="section-title">Admin</p>
@@ -273,13 +334,26 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
         <div className="countdown-box"><b>{total}</b><span>Total RSVPs</span></div>
         <div className="countdown-box"><b>{yesCount}</b><span>Attending</span></div>
         <div className="countdown-box"><b>{noCount}</b><span>Not attending</span></div>
       </div>
 
-      <div className="soft-card rounded-[2rem] p-4 sm:p-10 reveal">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
+        <div className="countdown-box"><b>{eventYes("welcome")}</b><span>Fri welcome</span></div>
+        <div className="countdown-box"><b>{eventYes("oma")}</b><span>Fri OMA Lounge</span></div>
+        <div className="countdown-box"><b>{eventYes("brunch")}</b><span>Sun brunch</span></div>
+      </div>
+      <p className="text-xs text-[var(--muted)] mb-8 sm:mb-10">
+        Event counts are for attending guests. {repliedCount} of {yesCount} have replied to the event form.
+      </p>
+
+      {eventsError && (
+        <p className="text-sm text-[#a13f3a] mb-6" role="alert">{eventsError}</p>
+      )}
+
+      <div className="soft-card rounded-[2rem] p-4 sm:p-6 reveal">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
           <div>
             <p className="section-title">Responses</p>
@@ -312,6 +386,7 @@ export default function AdminDashboard() {
                 { value: "all", label: "All" },
                 { value: "yes", label: "Attending" },
                 { value: "no", label: "Not attending" },
+                { value: "pending", label: "Awaiting event reply" },
               ].map((opt) => (
                 <label key={opt.value}>
                   <input
@@ -344,25 +419,28 @@ export default function AdminDashboard() {
 
         {!loading && !error && visibleRsvps.length > 0 && (
           <div className="rsvp-table-scroll">
-            <table className="rsvp-table w-full text-sm text-left">
+            <table className="rsvp-table w-full text-sm text-left" style={{ minWidth: 0, width: "100%" }}>
               <thead>
                 <tr className="border-b border-[var(--gold-soft)] text-[var(--muted)]">
-                  <th className="py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("full_name")}>
+                  <th className="py-2 pr-2 font-medium cursor-pointer select-none" onClick={() => toggleSort("full_name")}>
                     Name{sortIndicator("full_name")}
                   </th>
-                  <th className="py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("phone")}>
+                  <th className="py-2 pr-2 font-medium cursor-pointer select-none" onClick={() => toggleSort("phone")}>
                     Phone{sortIndicator("phone")}
                   </th>
-                  <th className="py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("email")}>
+                  <th className="py-2 pr-2 font-medium cursor-pointer select-none" onClick={() => toggleSort("email")}>
                     Email{sortIndicator("email")}
                   </th>
-                  <th className="py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("attending")}>
+                  <th className="py-2 pr-2 font-medium cursor-pointer select-none" onClick={() => toggleSort("attending")}>
                     Attending{sortIndicator("attending")}
                   </th>
-                  <th className="hidden sm:table-cell py-2 pr-4 font-medium cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
+                  <th className="py-2 pr-2 font-medium" title="Friday welcome drinks">Welcome</th>
+                  <th className="py-2 pr-2 font-medium" title="Friday evening at OMA Lounge">OMA</th>
+                  <th className="py-2 pr-2 font-medium" title="Sunday post-wedding brunch">Brunch</th>
+                  <th className="hidden xl:table-cell py-2 pr-2 font-medium cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
                     Submitted{sortIndicator("created_at")}
                   </th>
-                  <th className="py-2 pr-4 font-medium">Actions</th>
+                  <th className="py-2 pr-2 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -372,7 +450,7 @@ export default function AdminDashboard() {
                     <tr key={r.id} className="border-b border-[var(--gold-soft)]/40 align-top">
                       {isEditing ? (
                         <>
-                          <td className="py-3 pr-4" data-label="Name">
+                          <td className="py-3 pr-2" data-label="Name">
                             <input
                               className="edit-input"
                               type="text"
@@ -380,7 +458,7 @@ export default function AdminDashboard() {
                               onChange={(e) => setEditForm((f) => ({ ...f, full_name: e.target.value }))}
                             />
                           </td>
-                          <td className="py-3 pr-4" data-label="Phone">
+                          <td className="py-3 pr-2" data-label="Phone">
                             <input
                               className="edit-input"
                               type="tel"
@@ -388,7 +466,7 @@ export default function AdminDashboard() {
                               onChange={(e) => setEditForm((f) => ({ ...f, phone: e.target.value }))}
                             />
                           </td>
-                          <td className="py-3 pr-4" data-label="Email">
+                          <td className="py-3 pr-2" data-label="Email">
                             <input
                               className="edit-input"
                               type="email"
@@ -396,7 +474,7 @@ export default function AdminDashboard() {
                               onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
                             />
                           </td>
-                          <td className="py-3 pr-4" data-label="Attending">
+                          <td className="py-3 pr-2" data-label="Attending">
                             <select
                               className="edit-input"
                               value={editForm.attending}
@@ -406,10 +484,13 @@ export default function AdminDashboard() {
                               <option value="no">No</option>
                             </select>
                           </td>
-                          <td className="hidden sm:table-cell py-3 pr-4 text-[var(--muted)]" data-label="Submitted">
+                          <td className="py-3 pr-2 text-[var(--muted)]" data-label="Welcome">{eventMark(r, "welcome")}</td>
+                          <td className="py-3 pr-2 text-[var(--muted)]" data-label="OMA">{eventMark(r, "oma")}</td>
+                          <td className="py-3 pr-2 text-[var(--muted)]" data-label="Brunch">{eventMark(r, "brunch")}</td>
+                          <td className="hidden xl:table-cell py-3 pr-2 text-[var(--muted)]" data-label="Submitted">
                             {r.created_at ? new Date(r.created_at).toLocaleString() : "—"}
                           </td>
-                          <td className="py-3 pr-4" data-label="Actions">
+                          <td className="py-3 pr-2" data-label="Actions">
                             <div className="flex flex-col gap-2 items-start">
                               <div className="flex gap-2 w-full">
                                 <button
@@ -435,18 +516,21 @@ export default function AdminDashboard() {
                         </>
                       ) : (
                         <>
-                          <td className="py-3 pr-4" data-label="Name">{r.full_name}</td>
-                          <td className="py-3 pr-4" data-label="Phone">{r.phone}</td>
-                          <td className="py-3 pr-4 break-all" data-label="Email">{r.email}</td>
-                          <td className="py-3 pr-4" data-label="Attending">
+                          <td className="py-3 pr-2" data-label="Name">{r.full_name}</td>
+                          <td className="py-3 pr-2 whitespace-nowrap" data-label="Phone">{r.phone}</td>
+                          <td className="py-3 pr-2 break-all" data-label="Email">{r.email}</td>
+                          <td className="py-3 pr-2" data-label="Attending">
                             <span className={`pill px-3 py-1 rounded-full text-xs font-semibold ${r.attending === "yes" ? "" : "opacity-70"}`}>
                               {r.attending === "yes" ? "✓ Yes" : "✕ No"}
                             </span>
                           </td>
-                          <td className="hidden sm:table-cell py-3 pr-4 text-[var(--muted)]" data-label="Submitted">
+                          <td className="py-3 pr-2" data-label="Welcome">{eventMark(r, "welcome")}</td>
+                          <td className="py-3 pr-2" data-label="OMA">{eventMark(r, "oma")}</td>
+                          <td className="py-3 pr-2" data-label="Brunch">{eventMark(r, "brunch")}</td>
+                          <td className="hidden xl:table-cell py-3 pr-2 text-[var(--muted)]" data-label="Submitted">
                             {r.created_at ? new Date(r.created_at).toLocaleString() : "—"}
                           </td>
-                          <td className="py-3 pr-4" data-label="Actions">
+                          <td className="py-3 pr-2" data-label="Actions">
                             <div className="flex flex-col gap-2 items-start">
                               <div className="flex gap-2 w-full">
                                 <button
