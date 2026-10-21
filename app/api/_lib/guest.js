@@ -3,10 +3,17 @@ import { createClient } from "@supabase/supabase-js";
 
 // Server-only helpers for guest login. Needs these env vars:
 //   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, GUEST_SESSION_SECRET (long random string)
-export const db = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Created lazily so the build doesn't fail when env vars are only available at runtime.
+let _db;
+export function getDb() {
+  if (!_db) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    _db = createClient(url, key);
+  }
+  return _db;
+}
 
 const COOKIE = "guest_session";
 const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
@@ -43,7 +50,7 @@ export async function getGuest(req) {
   try { data = JSON.parse(Buffer.from(payload, "base64url").toString()); } catch { return null; }
   if (!data.id || !data.exp || data.exp < Date.now()) return null;
 
-  const { data: row } = await db
+  const { data: row } = await getDb()
     .from("rsvps")
     .select("id, full_name, email, phone, attending")
     .eq("id", data.id)

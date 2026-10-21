@@ -1,4 +1,6 @@
-import { db, getGuest, makeCookie, clearCookie, phoneKey, isYes } from "../_lib/guest";
+import { getDb, getGuest, makeCookie, clearCookie, phoneKey, isYes } from "../_lib/guest";
+
+export const dynamic = "force-dynamic";
 
 // Best-effort brute-force guard (per server instance; use a real rate limiter such as Upstash for stronger protection).
 const hits = new Map();
@@ -31,7 +33,7 @@ export async function POST(req) {
   if (id.includes("@")) {
     // Case-insensitive exact match (escape LIKE wildcards so "_" and "%" are treated literally)
     const pattern = id.replace(/[\\%_]/g, "\\$&");
-    const { data, error } = await db
+    const { data, error } = await getDb()
       .from("rsvps")
       .select("id, full_name, attending")
       .ilike("email", pattern);
@@ -43,7 +45,7 @@ export async function POST(req) {
   } else {
     const key = phoneKey(id);
     if (key.length >= 7) {
-      const { data, error } = await db.from("rsvps").select("id, full_name, phone, attending");
+      const { data, error } = await getDb().from("rsvps").select("id, full_name, phone, attending");
       if (error) {
         console.error("[guest login] Supabase error:", error);
         return Response.json({ error: "Server setup problem. Please try again later." }, { status: 500 });
