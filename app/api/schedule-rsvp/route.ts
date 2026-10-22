@@ -1,117 +1,47 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { supabase as anonClient } from "../../../lib/supabaseClient";
-import { getGuest } from "../../../lib/session";
+import { getDb, getGuest } from "../_lib/guest";
 
 export const dynamic = "force-dynamic";
 
-// Prefer a server-only service-role client (bypasses row-level security).
-function getDb() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (url && key) {
-    return createClient(url, key, { auth: { persistSession: false } });
-  }
-  return anonClient || null;
-}
-
-// Returns the signed-in guest's saved event replies, if any.
-export async function GET(request) {
-  let guest = null;
-  try {
-    guest = getGuest(request);
-  } catch (e) {
-    console.error("schedule-rsvp session error:", e.message);
-  }
-  if (!guest || !guest.email) {
-    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
-  }
-
-  const db = getDb();
-  if (!db) {
-    return NextResponse.json({ error: "Storage not connected." }, { status: 500 });
-  }
-
-  const { data, error } = await db
-    .from("schedule_rsvps")
-    .select("welcome, oma, brunch")
-    .eq("email", String(guest.email).trim().toLowerCase())
+// Load the signed-in guest's earlier answers (to pre-fill the form).
+export async function GET(req) {
+  const g = await getGuest(req);
+  if (!g) return Response.json({ error: "Not signed in" }, { status: 401 });
+  const { data } = await getDb()
+    .from("event_attendance")
+    .select("friday_welcome, oma_lounge, sunday_brunch")
+    .eq("rsvp_id", g.id)
     .maybeSingle();
-
-  if (error) {
-    console.error("schedule-rsvp load failed:", error);
-    return NextResponse.json({ error: "Couldn't load your replies." }, { status: 500 });
-  }
-
-  if (!data) return NextResponse.json({ exists: false });
-  return NextResponse.json({
-    exists: true,
-    welcome: !!data.welcome,
-    oma: !!data.oma,
-    brunch: !!data.brunch,
+  return Response.json({
+    answered: !!data,
+    welcome: data?.friday_welcome ?? null,
+    oma: data?.oma_lounge ?? null,
+    brunch: data?.sunday_brunch ?? null,
   });
 }
 
-export async function POST(request) {
-  // 1. The guest must be signed in (valid signed session cookie).
-  let guest = null;
-  try {
-    guest = getGuest(request);
-  } catch (e) {
-    console.error("schedule-rsvp session error:", e.message);
-  }
-  if (!guest || !guest.email) {
-    return NextResponse.json(
-      { error: "Please sign in with your RSVP email or phone first." },
-      { status: 401 }
-    );
+// Save answers for the signed-in guest. Identity comes from the session, never from the request body.
+export async function POST(req) {
+  const g = await getGuest(req);
+  if (!g) return Response.json({ error: "Not signed in" }, { status: 401 });
+
+  let b;
+  try { b = await req.json(); } catch { return Response.json({ error: "Bad request" }, { status: 400 }); }
+  for (const k of ["welcome", "oma", "brunch"]) {
+    if (typeof b[k] !== "boolean") return Response.json({ error: "Missing answer." }, { status: 400 });
   }
 
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
-  }
-
-  // 2. Spam trap: real guests never fill the hidden "website" field.
-  if (body.website) {
-    return NextResponse.json({ ok: true });
-  }
-
-  const full_name = String(body.full_name || "").trim();
-  if (!full_name) {
-    return NextResponse.json({ error: "Name is required." }, { status: 400 });
-  }
-
-  const db = getDb();
-  if (!db) {
-    return NextResponse.json({ error: "Storage not connected." }, { status: 500 });
-  }
-
-  // 3. One row per guest, keyed by their verified RSVP email.
-  const { error } = await db.from("schedule_rsvps").upsert(
+  const { error } = await getDb().from("event_attendance").upsert(
     {
-      email: String(guest.email).trim().toLowerCase(),
-      full_name,
-      welcome: !!body.welcome,
-      oma: !!body.oma,
-      brunch: !!body.brunch,
+      rsvp_id: g.id,
+      email: g.email,
+      full_name: g.full_name,
+      friday_welcome: b.welcome,
+      oma_lounge: b.oma,
+      sunday_brunch: b.brunch,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "email" }
+    { onConflict: "rsvp_id" }
   );
-
-  if (error) {
-    console.error("schedule-rsvp insert failed:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to save your replies.",
-        detail: process.env.NODE_ENV !== "production" ? error.message : undefined,
-      },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ ok: true });
+  if (error) return Response.json({ error: "Could not save." }, { status: 500 });
+  return Response.json({ ok: true });
 }

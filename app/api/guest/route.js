@@ -21,6 +21,18 @@ export async function GET(req) {
 
 // Sign in with the email or phone number used on the RSVP form.
 export async function POST(req) {
+    if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    !process.env.GUEST_SESSION_SECRET
+  ) {
+    console.error("[guest login] Missing env vars", {
+      url: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      serviceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      secret: !!process.env.GUEST_SESSION_SECRET,
+    });
+    return Response.json({ error: "Server not configured: missing environment variables." }, { status: 500 });
+  }
   const ip = (req.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
   if (limited(ip)) return Response.json({ error: "Too many attempts. Please wait a few minutes." }, { status: 429 });
 
