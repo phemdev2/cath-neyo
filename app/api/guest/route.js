@@ -2,7 +2,6 @@ import { getDb, getGuest, makeCookie, clearCookie, phoneKey, isYes } from "../_l
 
 export const dynamic = "force-dynamic";
 
-// Best-effort brute-force guard (per server instance; use a real rate limiter such as Upstash for stronger protection).
 const hits = new Map();
 function limited(ip) {
   const now = Date.now();
@@ -12,27 +11,20 @@ function limited(ip) {
   return recent.length > 10;
 }
 
-// Who am I? (used on page load to restore a session)
 export async function GET(req) {
   const g = await getGuest(req);
   if (!g) return Response.json({ error: "Not signed in" }, { status: 401 });
   return Response.json({ name: g.full_name });
 }
 
-// Sign in with the email or phone number used on the RSVP form.
 export async function POST(req) {
-    if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    !process.env.GUEST_SESSION_SECRET
-  ) {
-    console.error("[guest login] Missing env vars", {
-      url: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      serviceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      secret: !!process.env.GUEST_SESSION_SECRET,
-    });
-    return Response.json({ error: "Server not configured: missing environment variables." }, { status: 500 });
+  const missing = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "GUEST_SESSION_SECRET"]
+    .filter((k) => !process.env[k]);
+  if (missing.length) {
+    console.error("[guest login] Missing env vars:", missing.join(", "));
+    return Response.json({ error: "Server not configured. Missing: " + missing.join(", ") }, { status: 500 });
   }
+
   const ip = (req.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
   if (limited(ip)) return Response.json({ error: "Too many attempts. Please wait a few minutes." }, { status: 429 });
 
@@ -43,7 +35,6 @@ export async function POST(req) {
 
   let match = null;
   if (id.includes("@")) {
-    // Case-insensitive exact match (escape LIKE wildcards so "_" and "%" are treated literally)
     const pattern = id.replace(/[\\%_]/g, "\\$&");
     const { data, error } = await getDb()
       .from("rsvps")
@@ -66,7 +57,6 @@ export async function POST(req) {
     }
   }
 
-  // Same message whether the details are unknown or the guest declined, so nobody can probe the guest list.
   if (!match) {
     return Response.json(
       { error: "We couldn’t find an attending RSVP with those details. Please use the email or phone number from your RSVP." },
@@ -78,7 +68,6 @@ export async function POST(req) {
   });
 }
 
-// Sign out
 export async function DELETE() {
   return new Response(JSON.stringify({ ok: true }), {
     headers: { "Content-Type": "application/json", "Set-Cookie": clearCookie() },
