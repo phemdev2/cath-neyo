@@ -10,7 +10,7 @@ export default function AdminDashboard() {
   const [userEmail, setUserEmail] = useState(null);
 
   const [rsvps, setRsvps] = useState([]);
-  const [events, setEvents] = useState({}); // schedule_rsvps rows keyed by lowercase email
+  const [events, setEvents] = useState({}); // event_attendance rows keyed by rsvp id
   const [eventsError, setEventsError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -75,18 +75,22 @@ export default function AdminDashboard() {
 
       // Event replies are loaded separately so a problem here never hides the RSVP list.
       const { data: evData, error: evError } = await supabase
-        .from("schedule_rsvps")
+        .from("event_attendance")
         .select("*");
 
       if (evError) {
-        console.error("schedule_rsvps load failed:", evError);
+        console.error("event_attendance load failed:", evError);
         setEventsError(
-          "Couldn't load event replies. Check that the admin read policy exists on schedule_rsvps."
+          "Couldn't load event replies. Check that the admin read policy exists on event_attendance."
         );
       } else {
         const map = {};
         (evData || []).forEach((row) => {
-          map[String(row.email || "").trim().toLowerCase()] = row;
+          map[row.rsvp_id] = {
+            welcome: row.friday_welcome,
+            oma: row.oma_lounge,
+            brunch: row.sunday_brunch,
+          };
         });
         setEvents(map);
       }
@@ -104,7 +108,7 @@ export default function AdminDashboard() {
   }
 
   function getEvent(r) {
-    return events[String(r.email || "").trim().toLowerCase()];
+    return events[r.id];
   }
 
   // "✓" yes, "✕" no, "—" hasn't replied to the event form
@@ -559,9 +563,9 @@ export default function AdminDashboard() {
                 })}
               </tbody>
             </table>
-          </div>
+          </div>     
         )}
       </div>
     </main>
   );
-}
+} 
