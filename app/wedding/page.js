@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./wedding.css";
 
 const PAGES = [
@@ -328,6 +328,177 @@ function Party() {
   );
 }
 
+// Image that opens full screen with zoom (wheel, pinch, double-click, buttons) and drag-to-pan.
+function ZoomImage({ src, alt }) {
+  const [open, setOpen] = useState(false);
+  const [v, setV] = useState({ s: 1, x: 0, y: 0 });
+  const stage = useRef(null);
+  const img = useRef(null);
+  const pts = useRef(new Map());
+  const lastDist = useRef(0);
+  const MAX = 5;
+
+  // Keep the image from being dragged out of view
+  const clamp = useCallback((s, x, y) => {
+    const st = stage.current, im = img.current;
+    if (!st || !im) return { s, x, y };
+    const mx = Math.max(0, (im.offsetWidth * s - st.clientWidth) / 2);
+    const my = Math.max(0, (im.offsetHeight * s - st.clientHeight) / 2);
+    return { s, x: Math.min(mx, Math.max(-mx, x)), y: Math.min(my, Math.max(-my, y)) };
+  }, []);
+
+  // Zoom to scale `ns`, keeping the point (cx, cy) (relative to the stage centre) fixed
+  const zoomTo = useCallback((ns, cx = 0, cy = 0) => {
+    setV((p) => {
+      const s = Math.min(MAX, Math.max(1, ns));
+      const k = s / p.s;
+      return clamp(s, cx - (cx - p.x) * k, cy - (cy - p.y) * k);
+    });
+  }, [clamp]);
+
+  const close = () => { setOpen(false); pts.current.clear(); };
+  const reset = () => setV({ s: 1, x: 0, y: 0 });
+
+  useEffect(() => {
+    if (!open) return;
+    reset();
+    const onKey = (e) => {
+      if (e.key === "Escape") close();
+      if (e.key === "+" || e.key === "=") setV((p) => clamp(Math.min(MAX, p.s * 1.4), p.x, p.y));
+      if (e.key === "-") setV((p) => { const s = Math.max(1, p.s / 1.4); return clamp(s, p.x, p.y); });
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, clamp]);
+
+  const centre = (e) => {
+    const r = stage.current.getBoundingClientRect();
+    return [e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2];
+  };
+
+  function onPointerDown(e) {
+    stage.current.setPointerCapture(e.pointerId);
+    pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.current.size === 2) {
+      const [a, b] = [...pts.current.values()];
+      lastDist.current = Math.hypot(a.x - b.x, a.y - b.y);
+    }
+  }
+
+  function onPointerMove(e) {
+    const prev = pts.current.get(e.pointerId);
+    if (!prev) return;
+    const cur = { x: e.clientX, y: e.clientY };
+    pts.current.set(e.pointerId, cur);
+    if (pts.current.size === 1) {
+      const dx = cur.x - prev.x, dy = cur.y - prev.y;
+      setV((p) => clamp(p.s, p.x + dx, p.y + dy));
+    } else if (pts.current.size === 2) {
+      const [a, b] = [...pts.current.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (lastDist.current) {
+        const r = stage.current.getBoundingClientRect();
+        const mx = (a.x + b.x) / 2 - r.left - r.width / 2;
+        const my = (a.y + b.y) / 2 - r.top - r.height / 2;
+        const ratio = d / lastDist.current;
+        setV((p) => {
+          const s = Math.min(MAX, Math.max(1, p.s * ratio));
+          const k = s / p.s;
+          return clamp(s, mx - (mx - p.x) * k, my - (my - p.y) * k);
+        });
+      }
+      lastDist.current = d;
+    }
+  }
+
+  function onPointerUp(e) {
+    pts.current.delete(e.pointerId);
+    lastDist.current = 0;
+  }
+
+  function onWheel(e) {
+    const [cx, cy] = centre(e);
+    setV((p) => {
+      const s = Math.min(MAX, Math.max(1, p.s * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
+      const k = s / p.s;
+      return clamp(s, cx - (cx - p.x) * k, cy - (cy - p.y) * k);
+    });
+  }
+
+  function onDoubleClick(e) {
+    if (v.s > 1) reset();
+    else { const [cx, cy] = centre(e); zoomTo(2.5, cx, cy); }
+  }
+
+  return (
+    <>
+      <style>{`
+        .zi { position: relative; display: block; width: 100%; margin: 0 0 20px; padding: 0; border: 0;
+          background: none; cursor: zoom-in; border-radius: 14px; overflow: hidden;
+          box-shadow: 0 10px 28px rgba(60, 45, 20, 0.14); }
+        .zi img { display: block; width: 100%; height: auto; }
+        .zi .zi-hint { position: absolute; right: 12px; bottom: 12px; padding: 6px 12px; border-radius: 999px;
+          background: rgba(20, 15, 10, 0.6); color: #fff; font-size: .75rem; letter-spacing: .06em; pointer-events: none; }
+        .zi:focus-visible { outline: 2px solid #a67c37; outline-offset: 2px; }
+        .zv { position: fixed; inset: 0; z-index: 200; background: rgba(20, 15, 10, 0.95); }
+        .zv .zv-stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+          overflow: hidden; touch-action: none; user-select: none; cursor: grab; }
+        .zv .zv-stage:active { cursor: grabbing; }
+        .zv .zv-stage img { max-width: 94vw; max-height: 86vh; object-fit: contain; border-radius: 8px;
+          transform-origin: center; will-change: transform; -webkit-user-drag: none; pointer-events: none; }
+        .zv button { display: grid; place-items: center; min-width: 44px; height: 44px; padding: 0 14px; border: 0;
+          border-radius: 999px; background: rgba(255, 255, 255, 0.16); color: #fff; font-size: 1.3rem; line-height: 1; cursor: pointer; }
+        .zv button:hover { background: rgba(255, 255, 255, 0.3); }
+        .zv .zv-x { position: absolute; top: 16px; right: 16px; z-index: 2; }
+        .zv .zv-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2;
+          display: flex; align-items: center; gap: 8px; }
+        .zv .zv-bar .zv-pct { color: #fff; font-size: .85rem; min-width: 52px; text-align: center; }
+        .zv .zv-bar .zv-reset { font-size: .85rem; }
+      `}</style>
+
+      <button type="button" className="zi" onClick={() => setOpen(true)} aria-label={"Open full-size photo: " + alt}>
+        <img src={src} alt={alt} loading="lazy" />
+        <span className="zi-hint">🔍 Tap to zoom</span>
+      </button>
+
+      {open && (
+        <div className="zv" role="dialog" aria-modal="true" aria-label="Photo viewer">
+          <button type="button" className="zv-x" aria-label="Close" onClick={close}>✕</button>
+          <div
+            className="zv-stage"
+            ref={stage}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onWheel={onWheel}
+            onDoubleClick={onDoubleClick}
+          >
+            <img
+              ref={img}
+              src={src}
+              alt={alt}
+              draggable={false}
+              style={{ transform: `translate(${v.x}px, ${v.y}px) scale(${v.s})` }}
+            />
+          </div>
+          <div className="zv-bar">
+            <button type="button" aria-label="Zoom out" onClick={() => zoomTo(v.s / 1.4)}>−</button>
+            <span className="zv-pct">{Math.round(v.s * 100)}%</span>
+            <button type="button" aria-label="Zoom in" onClick={() => zoomTo(v.s * 1.4)}>+</button>
+            <button type="button" className="zv-reset" onClick={reset}>Reset</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function PageHead({ title, sub }) {
   return (
     <div className="page-head">
@@ -550,10 +721,10 @@ export default function WeddingPage() {
             </div>
           </section>
           <section className={"pg" + (page === "party" ? " on" : "")}><div className="wrap c"><PageHead title="Wedding Party" sub="The people standing with us on our special day." /><Party /></div></section>
-          <section className={"pg" + (page === "travel" ? " on" : "")}><div className="wrap"><PageHead title="Travel" sub="Everything you need for your journey to Albania." /><h3>Getting into Albania</h3><p>We recommend flying into Tirana International Airport.</p><div style={{ marginTop: 56, paddingTop: 32, borderTop: "1px solid rgba(176, 138, 74, 0.3)" }}><h3 style={{ marginTop: 0 }}>Getting around</h3><ul><li style={{ marginBottom: 28 }}><b>25-minute radius.</b> Our wedding is in the capital, Tirana. The venue is within 25 minutes of both the city centre and the airport.</li><li style={{ marginBottom: 28 }}><b>Rides.</b> Rent a car (e.g. Rent Motors, beside the airport) or use a local taxi app: VrapOn Taxi Albania, Patoko or Speed Taxi Albania. Uber and Bolt are not available in Albania.</li><li style={{ marginBottom: 28 }}><b>Local transport.</b> Albania has reliable buses, but most require cash in Albanian Lek. Exchange at the airport to avoid surge charges at ATMs.</li><li style={{ marginBottom: 0 }}><br></br><b>Spending &amp; currency.</b> The national currency is the Albanian Lek, which can only be exchanged in Albania (airports). Euros are also widely used. Bring some cash for the city centre and local markets; international bank cards work for other expenses.</li></ul></div></div></section>
-          <section className={"pg" + (page === "accommodation" ? " on" : "")}><div className="wrap"><PageHead title="Accommodation" sub="Everything you need for your stay in Albania." /><p className="eyebrow" style={{ marginBottom: 10 }}>Make yourself at home</p><h3>Select Hill Resort</h3><img src="/select-hill.jpg" alt="Aerial view of the pool and terraces at Select Hill Resort, set among the hills of Dajt" style={{ display: "block", width: "100%", height: "auto", margin: "0 0 20px", borderRadius: 14, boxShadow: "0 10px 28px rgba(60, 45, 20, 0.14)" }} loading="lazy" /><div className="box">We’d recommend staying at Select Hill Resort for our wedding weekend. As part of our wedding package our guests will be granted a 20% discount for their room bookings.<br /><br />Please contact Ife &amp; Niyi directly to secure your rooms. Alternatively you can contact Select Hill Resort directly via WhatsApp on <a href="https://wa.me/355686611111" {...NEWTAB}>+355 68661 1111</a> and quote ‘IfeNiyi2027’ for the discount to be applied.<br /><br />Please secure your booking by <b>1 December 2026</b>.<br /><br /><a className="btn" style={{ marginLeft: 0 }} href="https://selecthill.com/" {...NEWTAB}>Visit Select Hill Resort</a></div><h3>Other stays in Tirana</h3><ul className="linklist"><li><a href="https://www.melia.com/en" {...NEWTAB}>Hotel Elisa Tirana</a></li><li><a href="https://all.accor.com" {...NEWTAB}>Mercure Hotel Tirana</a></li><li><a href="https://royalhill.tiranehotel.com/en/" {...NEWTAB}>Royal Hill Hotel</a></li><li><a href="https://xheko-imperial.com/" {...NEWTAB}>Xheko Imperial Hotel and Spa</a></li><li><a href="https://bianca.al/" {...NEWTAB}>Bianca Hotel and Villa</a></li></ul></div></section>
+          <section className={"pg" + (page === "travel" ? " on" : "")}><div className="wrap"><PageHead title="Travel" sub="Everything you need for your journey to Albania." /><h3>Getting into Albania</h3><p>We recommend flying into Tirana International Airport.</p><div style={{ marginTop: 56, paddingTop: 32, borderTop: "1px solid rgba(176, 138, 74, 0.3)" }}><h3 style={{ marginTop: 0 }}>Getting around</h3><ul><li style={{ marginBottom: 28 }}><b>25-minute radius.</b> Our wedding is in the capital, Tirana. The venue is within 25 minutes of both the city centre and the airport.</li><li style={{ marginBottom: 28 }}><b>Rides.</b> We suggest renting a car (e.g. Rent Motors, beside the airport) or use a local taxi app: VrapOn Taxi Albania, Patoko or Speed Taxi Albania. Uber and Bolt are not available in Albania.</li><li style={{ marginBottom: 28 }}><b>Local transport.</b> Albania has reliable buses, but most require cash in Albanian Lek. Exchange at the airport to avoid surge charges at ATMs.</li><li style={{ marginBottom: 0 }}><b>Spending &amp; currency.</b> The national currency is the Albanian Lek, which can only be exchanged in Albania (airport). Euros are also widely used. Bring some cash for the city centre and local markets; international bank cards work for other expenses.</li></ul></div></div></section>
+          <section className={"pg" + (page === "accommodation" ? " on" : "")}><div className="wrap"><PageHead title="Accommodation" sub="Everything you need for your stay in Albania." /><p className="eyebrow" style={{ marginBottom: 10 }}>Make yourself at home</p><h3>Select Hill Resort</h3><ZoomImage src="https://cf.bstatic.com/xdata/images/hotel/max1024x768/888208165.jpg?k=f5083dd6aa6b3f775dc0c5515f3314f6a742e8fe7f106bd689019852bf5af355&o=" alt="Aerial view of the pool and terraces at Select Hill Resort, set among the hills of Dajt" /><div className="box">We’d recommend staying at Select Hill Resort for our wedding weekend. As part of our wedding package our guests will be granted a 20% discount for their room bookings.<br /><br />Please contact Ife &amp; Niyi directly to secure your rooms. Alternatively you can contact Select Hill Resort directly via WhatsApp on <a href="https://wa.me/355686611111" {...NEWTAB}>+355 68661 1111</a> and quote ‘IfeNiyi2027’ for the discount to be applied.<br /><br />Please secure your booking by <b>1 December 2026</b>.<br /><br /><a className="btn" style={{ marginLeft: 0 }} href="https://selecthill.com/" {...NEWTAB}>Visit Select Hill Resort</a></div><h3>Other stays in Tirana</h3><ul className="linklist"><li><a href="https://www.melia.com/en" {...NEWTAB}>Hotel Elisa Tirana</a></li><li><a href="https://all.accor.com" {...NEWTAB}>Mercure Hotel Tirana</a></li><li><a href="https://royalhill.tiranehotel.com/en/" {...NEWTAB}>Royal Hill Hotel</a></li><li><a href="https://xheko-imperial.com/" {...NEWTAB}>Xheko Imperial Hotel and Spa</a></li><li><a href="https://bianca.al/" {...NEWTAB}>Bianca Hotel and Villa</a></li></ul></div></section>
           <section className={"pg" + (page === "registry" ? " on" : "")}><div className="wrap c"><PageHead title="Registry" /><p>Your presence is the greatest gift we could ask for, but if you would like to give a gift, we have created a gift registry to make it easier for you.</p><a className="btn" style={{ margin: "14px 0" }} href={REGISTRY_URL} {...NEWTAB}>Open our gift registry</a><p>Alternatively, a monetary gift can be sent to:</p><div className="box" style={{ display: "inline-block", textAlign: "left" }}>Name: MISS C I AJANI<br />Bank: Nationwide<br />Account number: 03352048<br />Sort code: 07-12-26</div><p style={{ fontFamily: "var(--serif)", fontSize: "1.5rem" }}>Thank you.</p></div></section>
-          <section className={"pg" + (page === "qa" ? " on" : "")}><div className="wrap"><PageHead title="Q&A" /><p className="c lead">Got a question? Check here first.</p><details><summary>When is the final RSVP deadline?</summary><p>If you need to change your RSVP response, please do so by 29 January 2027 so we have an accurate headcount.</p></details><details><summary>Can I bring a date?</summary><p>Due to restrictions on numbers, entry is strictly by invitation only.</p></details><details><summary>Are kids welcome?</summary><p>As much as we adore your little ones, they will not be included in the ceremony or reception.</p></details><details><summary>Where should I park?</summary><p>There is plenty of free parking on site.</p></details><details><summary>Are the ceremony and reception venues wheelchair accessible?</summary><p>Yes.</p></details><details><summary>What should I wear?</summary><ul className="attire"><li><b>Friday:</b> All white for the welcome evening.</li><li><b>Saturday:</b> Mediterranean earth tones: champagne, sage, peach, sand, taupe and terracotta.</li></ul></details><details><summary>Is the wedding indoors or outdoors?</summary><p>Weather permitting, the ceremony will be outdoors and the reception indoors.</p></details><details><summary>Can I take pictures during the wedding?</summary><p>Yes! We’d love for you to take photos and share them with us.</p></details><details><summary>Is there a gift registry?</summary><p>Yes, see the <a href="#registry">Registry page</a>. Your presence is the greatest gift we could ask for.</p></details></div></section>
+          <section className={"pg" + (page === "qa" ? " on" : "")}><div className="wrap"><PageHead title="Q&A" /><p className="c lead">Got a question? Check here first.</p><details><summary>When is the final RSVP deadline?</summary><p>If you need to change your RSVP response, please do so by 29 January 2027 so we have an accurate headcount.</p></details><details><summary>Can I bring a date?</summary><p>Due to restrictions on numbers, entry is strictly by invitation only.</p></details><details><summary>Are kids welcome?</summary><p>As much as we adore your little ones, they will not be included in the ceremony or reception.</p></details><details><summary>Where should I park?</summary><p>There is plenty of free parking on site.</p></details><details><summary>Are the ceremony and reception venues wheelchair accessible?</summary><p>Yes.</p></details><details><summary>What should I wear?</summary><ul className="attire"><li><b>Friday:</b> All white for the welcome evening.</li><li><b>Saturday:</b> Mediterranean earth tones: champagne, sage, peach, sand, taupe and terracotta.</li></ul></details><details><summary>Is the wedding indoors or outdoors?</summary><p>Weather permitting, the ceremony will be outdoors and the reception indoors.</p></details><details><summary>Can I take pictures during the wedding?</summary><p>We would love for everyone to be fully present and enjoy the moment with us. Therefore, the wedding ceremony will be an unplugged ceremony, meaning we kindly ask that guests refrain from taking pictures or recording videos during the ceremony so that everyone can be focused on the moment.</p><p>However, once the ceremony is over and we have been officially joined together, you are welcome to take as many pictures and videos as you like! We would also love for you to share your pictures and videos with us so we can cherish those beautiful memories together.</p><p>Thank you for understanding and helping us make this moment truly special. ❤️</p></details><details><summary>Is there a gift registry?</summary><p>Yes, see the <a href="#registry">Registry page</a>. Your presence is the greatest gift we could ask for.</p></details></div></section>
 
           <footer>
             #IfeNiyi2027
