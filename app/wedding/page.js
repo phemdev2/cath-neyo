@@ -22,7 +22,7 @@ const LOC = "Select Hill Resort, Rruga Nacionale Tirane-Dajt km5, Dajt, Tirana, 
 const TARGET = new Date("2027-03-27T12:00:00+01:00").getTime();
 
 // TODO: paste your real MyRegistry link here
-const REGISTRY_URL = "https://www.myregistry.com/REPLACE_WITH_YOUR_REGISTRY_URL";
+const REGISTRY_URL = "https://www.myregistry.com/https://www.myregistry.com/wedding-registry/ife-ajani-and-niyi-ojo-luton-bedfordshire/5656683";
 
 // Each event: [title, time, startDate, endDate, details, attendKey?, location?]
 // If no location (index 6) is given, the event defaults to the main venue (LOC).
@@ -39,8 +39,8 @@ const DAYS = [
         "20270327T010000",
         "For our guests who come alive in the night time, OMA is the place for you. Fridays are famously dedicated to the best Afrobeats, Amapiano, etc. If you're looking for more vibes, a packed dance floor, and a guaranteed good time, this is the place to be.\n\nThis requires booking, if you're interested please contact Ife & Niyi directly so logistics can be sorted.\n\nPS: Just don't be late to the ceremony on Saturday!",
         "Dress code: Dress to impress",
-        "oma",
-        "OMA Dyrrachium Restaurant & Beach Lounge, Rruga e Currilave, Durrës 2001, Albania",
+        "Location: OMA Dyrrachium Restaurant & Beach Lounge, Rruga e Currilave, Durrës 2001, Albania",
+        
       ],
     ],
   ],
