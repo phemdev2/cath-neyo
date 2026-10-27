@@ -37,7 +37,8 @@ const DAYS = [
         "22:00 onwards",
         "20270326T220000",
         "20270327T010000",
-        "For our guests who come alive in the night time, OMA is the place for you. Fridays are famously dedicated to the best Afrobeats, Amapiano, etc. If you're looking for more vibes, a packed dance floor, and a guaranteed good time, this is the place to be.\n\nThis requires booking, if you're interested please contact Ife & Niyi directly so logistics can be sorted.\n\nPS: Just don't be late to the ceremony on Saturday! Dress code: Dress to impress",
+        "For our guests who come alive in the night time, OMA is the place for you. Fridays are famously dedicated to the best Afrobeats, Amapiano, etc. If you're looking for more vibes, a packed dance floor, and a guaranteed good time, this is the place to be.\n\nThis requires booking, if you're interested please contact Ife & Niyi directly so logistics can be sorted.\n\nPS: Just don't be late to the ceremony on Saturday!",
+        "Dress code: Dress to impress",
         "oma",
         "OMA Dyrrachium Restaurant & Beach Lounge, Rruga e Currilave, Durrës 2001, Albania",
       ],
@@ -61,7 +62,7 @@ const DAYS = [
 
 // Events guests can say they're attending (the ceremony and reception are covered by the main RSVP)
 const ATTEND = [
-  ["welcome", "Friday: Welcome"],
+  ["welcome", "Friday: Welcome Evening"],
   ["oma", "Friday night: OMA Dyrrachium Beach Lounge, Durres"],
   ["brunch", "Sunday: Post-Wedding Brunch"],
 ];
@@ -291,8 +292,9 @@ function Moments() {
 
 // Wedding party: [name, role, photo file in /public, image focus point]
 const PARTY = [
-  ["Nelson Ugwonoh", "Best Man", "party-nelson.jpg", "50% 25%"],
   ["Charlotte Omorose", "Maid of Honour", "party-charlotte.jpg", "50% 12%"],
+  ["Nelson Ugwonoh", "Best Man", "party-nelson.jpg", "50% 25%"],
+  
 ];
 
 function Party() {
@@ -669,7 +671,7 @@ export default function WeddingPage() {
             <div className="hero">
               <h1 className="sr">Ife &amp; Niyi</h1>
               <div className="hero-grid">
-                <div className="flyer"><img src="/ifeneyo.png" alt="Ife and Niyi, Saturday 27 March 2027, Tirana, Albania" /></div>
+                <div className="flyer"><img src="/wedding.png" alt="Ife and Niyi, Saturday 27 March 2027, Tirana, Albania" /></div>
                 <div className="txt">
                   <Countdown />
                   <div className="card">
