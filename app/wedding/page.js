@@ -39,7 +39,7 @@ const DAYS = [
         "20270327T010000",
         "For our guests who come alive in the night time, OMA is the place for you. Fridays are famously dedicated to the best Afrobeats, Amapiano, etc. If you're looking for more vibes, a packed dance floor, and a guaranteed good time, this is the place to be.\n\nThis requires booking, if you're interested please contact Ife & Niyi directly so logistics can be sorted.\n\nPS: Just don't be late to the ceremony on Saturday!",
         "Dress code: Dress to impress",
-        "Location: OMA Dyrrachium Restaurant & Beach Lounge, Rruga e Currilave, Durrës 2001, Albania",
+        "OMA Dyrrachium Restaurant & Beach Lounge, Rruga e Currilave, Durrës 2001, Albania",
         
       ],
     ],
