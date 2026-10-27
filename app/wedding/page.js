@@ -671,7 +671,7 @@ export default function WeddingPage() {
             <div className="hero">
               <h1 className="sr">Ife &amp; Niyi</h1>
               <div className="hero-grid">
-                <div className="flyer"><img src="/wedding.png" alt="Ife and Niyi, Saturday 27 March 2027, Tirana, Albania" /></div>
+                <div className="flyer"><img src="/wedd.png" alt="Ife and Niyi, Saturday 27 March 2027, Tirana, Albania" /></div>
                 <div className="txt">
                   <Countdown />
                   <div className="card">
