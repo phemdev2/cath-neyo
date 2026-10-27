@@ -253,7 +253,7 @@ export default function Home() {
             <div className="hero-grid max-w-5xl mx-auto">
               <div className="flyer-frame fade-up" style={{ animationDelay: ".05s" }}>
                 <img
-                  src="/ife.png"
+                  src="/ifeniyi.png"
                   alt="Save the date: Ife &amp; Niyi, Saturday 27 March 2027, Tirana, Albania. Invitation to follow."
                 />
               </div>

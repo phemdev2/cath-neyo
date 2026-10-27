@@ -31,13 +31,13 @@ const DAYS = [
     "Friday 26 March 2027",
     [
       ["Bridal Party Rehearsal", "15:00 – 16:15", "20270326T150000", "20270326T161500", ""],
-      ["Welcome Evening, Drinks & Games", "18:30 – 21:30", "20270326T183000", "20270326T213000", "Dress code: all white", "welcome"],
+      ["Welcome Evening", "18:30 – 21:30", "20270326T183000", "20270326T213000", "Dress code: all white", "welcome"],
       [
         "OMA Dyrrachium Beach Lounge, Durres",
         "22:00 onwards",
         "20270326T220000",
         "20270327T010000",
-        "For our guests who come alive in the night time, OMA is the place for you. Fridays are famously dedicated to the best Afrobeats, Amapiano, etc. If you're looking for more vibes, a packed dance floor, and a guaranteed good time, this is the place to be. This requires booking, if you're interested please contact Ife & Niyi directly so logistics can be sorted. PS: Just don't be late to the ceremony on Saturday! Dress code: Dress to impress",
+        "For our guests who come alive in the night time, OMA is the place for you. Fridays are famously dedicated to the best Afrobeats, Amapiano, etc. If you're looking for more vibes, a packed dance floor, and a guaranteed good time, this is the place to be.\n\nThis requires booking, if you're interested please contact Ife & Niyi directly so logistics can be sorted.\n\nPS: Just don't be late to the ceremony on Saturday! Dress code: Dress to impress",
         "oma",
         "OMA Dyrrachium Restaurant & Beach Lounge, Rruga e Currilave, Durrës 2001, Albania",
       ],
@@ -47,8 +47,8 @@ const DAYS = [
     "Saturday 27 March 2027",
     [
       ["Wedding Ceremony", "12:00 (outdoor, weather permitting)", "20270327T120000", "20270327T133000", "Dress code: Mediterranean earth tones (champagne, sage, peach, sand, taupe, terracotta)"],
-      ["Cocktail Hour & Photoshoot", "From 13:15-15:00", "20270327T131500", "20270327T150000", "Dress code: Mediterranean earth tones (champagne, sage, peach, sand, taupe, terracotta)"],
-      ["Reception", "15:00 onwards (Wedding Hall)", "20270327T150000", "20270327T230000", "Dress code: Mediterranean earth tones"],
+      ["Cocktail Hour & Photoshoot", "From 13:15-15:00", "20270327T131500", "20270327T150000", "After the ceremony, we’ll take a few photos and enjoy a cocktail hour before the reception."],
+      ["Reception", "15:00 onwards (Wedding Hall)", "20270327T150000", "20270327T230000", ""],
     ],
   ],
   [
@@ -61,7 +61,7 @@ const DAYS = [
 
 // Events guests can say they're attending (the ceremony and reception are covered by the main RSVP)
 const ATTEND = [
-  ["welcome", "Friday: Welcome Drinks & Games"],
+  ["welcome", "Friday: Welcome"],
   ["oma", "Friday night: OMA Dyrrachium Beach Lounge, Durres"],
   ["brunch", "Sunday: Post-Wedding Brunch"],
 ];
@@ -83,7 +83,7 @@ function calendarUrl(e) {
     "&dates=" + e[2] + "/" + e[3] +
     "&ctz=Europe/Tirane" +
     "&location=" + encodeURIComponent(e[6] || LOC) +
-    "&details=" + encodeURIComponent(e[4])
+    "&details=" + encodeURIComponent(e[4] || "")
   );
 }
 
@@ -289,6 +289,45 @@ function Moments() {
   );
 }
 
+// Wedding party: [name, role, photo file in /public, image focus point]
+const PARTY = [
+  ["Nelson Ugwonoh", "Best Man", "party-nelson.jpg", "50% 25%"],
+  ["Charlotte Omorose", "Maid of Honour", "party-charlotte.jpg", "50% 12%"],
+];
+
+function Party() {
+  return (
+    <>
+      <style>{`
+        .party { display: grid; grid-template-columns: 1fr; gap: 28px; margin: 32px auto 0; max-width: 760px; }
+        @media (min-width: 640px) { .party { grid-template-columns: 1fr 1fr; gap: 32px; } }
+        .party .member { text-align: center; }
+        .party .member .ph {
+          aspect-ratio: 4 / 5; overflow: hidden; border-radius: 18px;
+          box-shadow: 0 10px 28px rgba(60, 45, 20, 0.14);
+        }
+        .party .member img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .party .member .role {
+          margin: 18px 0 4px; font-size: .75rem; letter-spacing: .18em;
+          text-transform: uppercase; color: var(--gold-deep);
+        }
+        .party .member .nm { margin: 0; font-family: var(--serif); font-size: 1.6rem; }
+      `}</style>
+      <div className="party">
+        {PARTY.map(([name, role, file, pos]) => (
+          <div className="member" key={name}>
+            <div className="ph">
+              <img src={"/" + file} alt={name + ", " + role} style={{ objectPosition: pos }} loading="lazy" />
+            </div>
+            <p className="role">{role}</p>
+            <p className="nm">{name}</p>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 function PageHead({ title, sub }) {
   return (
     <div className="page-head">
@@ -459,7 +498,7 @@ export default function WeddingPage() {
             <div className="hero">
               <h1 className="sr">Ife &amp; Niyi</h1>
               <div className="hero-grid">
-                <div className="flyer"><img src="/ife.png" alt="Ife and Niyi, Saturday 27 March 2027, Tirana, Albania" /></div>
+                <div className="flyer"><img src="/ifeniyi.png" alt="Ife and Niyi, Saturday 27 March 2027, Tirana, Albania" /></div>
                 <div className="txt">
                   <Countdown />
                   <div className="card">
@@ -472,7 +511,7 @@ export default function WeddingPage() {
             </div>
           </section>
           <section className={"pg" + (page === "story" ? " on" : "")}>
-            <div className="wrap story"><PageHead title="Our Story 🤍" /><img src="/gallery-1.jpg" alt="Ife and Niyi" style={{ display: "block", width: "100%", maxWidth: 420, height: "auto", margin: "0 auto 32px", borderRadius: 14, boxShadow: "0 10px 28px rgba(60, 45, 20, 0.14)" }} /><p className="scr">“At the right time, I, the Lord, will make it happen.”<br /><small style={{ font: "400 1rem var(--sans)", fontStyle: "normal" }}>Isaiah 60:22</small></p><p>Our journey is a beautiful testament to this promise: a love story ordained by God, brought together in His perfect timing and unfolding according to His divine plan.</p><p>A mutual interest in health and fitness quickly led to deeper conversations about faith, family, values and our dreams for the future. From the very beginning, there was a special alignment between us, one that God has continued to affirm throughout our journey.</p><div className="gal">{[2, 3].map((n) => (<img key={n} src={`/gallery-${n}.jpg`} alt="Ife and Niyi" loading="lazy" />))}</div><p>Then came the proposal. Being the intentional man he is, Niyi had spent months carefully planning a proposal that brought to life everything Ife had ever described as her dream. On 10 June 2026, in beautiful Albania, we said yes to forever.</p><p>Now, we return to the very place where our journey to forever began, ready to say “I Do” before God and our loved ones.</p><p>In each other, we have found not only love, but a best friend and a partner with whom to build a life rooted in faith, family and purpose.</p><p>Oyeniyi, as I proudly call him, is God-fearing, humble, consistent, kind, loving, hardworking (my personal Mr Barry), selfless and intentional - all the qualities I had prayed for, and somehow, God answered with so much more. He is an extension of God’s love towards me.</p><p>Ifemi, as I fondly call her, is God-fearing, family-oriented, thoughtful, supportive and caring. She has a kind heart, values family deeply and is always there for the people she loves. I am grateful to God for the woman she is and for the opportunity to build a life with her.</p><p>We are deeply grateful to our families and loved ones, whose love, prayers and support have helped shape who we are today. As we begin this new chapter, we also hold close the memory of those we dearly wish could be here to celebrate with us. Though absent in person, they remain forever in our hearts.</p><p>Above all, we give all glory to God. His timing, His faithfulness and His hand in our journey have brought us here, and we couldn’t be more grateful.</p><p className="c">With love,<br /><br />Ife &amp; Niyi 🤍<br /><br /><span style={{ color: "var(--acc)" }}>#IfeNiyi2027</span></p><h3 style={{ marginTop: 40 }} className="c">A little bit about us</h3>{ABOUT.map(([q, a]) => (<details key={q}><summary>{q}</summary><p>{a}</p></details>))}</div>
+            <div className="wrap story"><PageHead title="Our Story 🤍" /><img src="/gallery-1.jpg" alt="Ife and Niyi" style={{ display: "block", width: "100%", maxWidth: 420, height: "auto", margin: "0 auto 32px", borderRadius: 14, boxShadow: "0 10px 28px rgba(60, 45, 20, 0.14)" }} /><p className="scr">“At the right time, I, the Lord, will make it happen.”<br /><small style={{ font: "400 1rem var(--sans)", fontStyle: "normal" }}>Isaiah 60:22</small></p><p>Our journey is a beautiful testament to this promise: a love story ordained by God, brought together in His perfect timing and unfolding according to His divine plan.</p><p>A mutual interest in health and fitness quickly led to deeper conversations about faith, family, values and our dreams for the future. From the very beginning, there was a special alignment between us, one that God has continued to affirm throughout our journey.</p><div className="gal">{[2, 3].map((n) => (<img key={n} src={`/gallery-${n}.jpg`} alt="Ife and Niyi" loading="lazy" />))}</div><p>Then came the proposal. Being the intentional man he is, Niyi had spent months carefully planning a proposal that brought to life everything Ife had ever described as her dream. On 10 June 2026, in beautiful Albania, we said yes to forever.</p><p>Now, we return to the very place where our journey to forever began, ready to say “I Do” before God and our loved ones.</p><p>In each other, we have found not only love, but a best friend and a partner with whom to build a life rooted in faith, family and purpose.</p><p>Oyeniyi, as I proudly call him, is God-fearing, humble, consistent, kind, loving, hardworking (my personal Mr Barry), selfless and intentional — all the qualities I had prayed for, and somehow, God answered with so much more. He is an extension of God’s love towards me.</p><p>Ifemi, as I fondly call her, is God-fearing, family-oriented, thoughtful, supportive and caring. She has a kind heart, values family deeply and is always there for the people she loves. I am grateful to God for the woman she is and for the opportunity to build a life with her.</p><p>We are deeply grateful to our families and loved ones, whose love, prayers and support have helped shape who we are today. As we begin this new chapter, we also hold close the memory of those we dearly wish could be here to celebrate with us. Though absent in person, they remain forever in our hearts.</p><p>Above all, we give all glory to God. His timing, His faithfulness and His hand in our journey have brought us here, and we couldn’t be more grateful.</p><p className="c">With love,<br /><br />Ife &amp; Niyi 🤍<br /><br /><span style={{ color: "var(--acc)" }}>#IfeNiyi2027</span></p><h3 style={{ marginTop: 40 }} className="c">A little bit about us</h3>{ABOUT.map(([q, a]) => (<details key={q}><summary>{q}</summary><p>{a}</p></details>))}</div>
           </section>
           <section className={"pg" + (page === "moments" ? " on" : "")}>
             <div className="wrap"><PageHead title="Our Moments" sub="Memories from the day we said yes to forever." /><Moments /></div>
@@ -489,7 +528,7 @@ export default function WeddingPage() {
                     <div className="ev" key={e[0]}>
                       <b>{e[0]}</b>
                       <small>{e[1]}</small>
-                      {e[4] && <small>{e[4]}</small>}
+                      {e[4] && <small style={{ whiteSpace: "pre-line" }}>{e[4]}</small>}
                       {e[6] && <small>Location: {e[6]}</small>}
                       <a className="btn" href={calendarUrl(e)} {...NEWTAB}>Add to calendar</a>
                       {e[5] && (
@@ -510,9 +549,9 @@ export default function WeddingPage() {
               {guest && <AttendanceForm guest={guest} />}
             </div>
           </section>
-          <section className={"pg" + (page === "party" ? " on" : "")}><div className="wrap c"><PageHead title="Wedding Party" /><p className="lead">Stay tuned. We’ll introduce our wedding party here soon.</p></div></section>
+          <section className={"pg" + (page === "party" ? " on" : "")}><div className="wrap c"><PageHead title="Wedding Party" sub="The people standing with us on our special day." /><Party /></div></section>
           <section className={"pg" + (page === "travel" ? " on" : "")}><div className="wrap"><PageHead title="Travel" sub="Everything you need for your journey to Albania." /><h3>Getting into Albania</h3><p>We recommend flying into Tirana International Airport.</p><div style={{ marginTop: 56, paddingTop: 32, borderTop: "1px solid rgba(176, 138, 74, 0.3)" }}><h3 style={{ marginTop: 0 }}>Getting around</h3><ul><li style={{ marginBottom: 28 }}><b>25-minute radius.</b> Our wedding is in the capital, Tirana. The venue is within 25 minutes of both the city centre and the airport.</li><li style={{ marginBottom: 28 }}><b>Rides.</b> Rent a car (e.g. Rent Motors, beside the airport) or use a local taxi app: VrapOn Taxi Albania, Patoko or Speed Taxi Albania. Uber and Bolt are not available in Albania.</li><li style={{ marginBottom: 28 }}><b>Local transport.</b> Albania has reliable buses, but most require cash in Albanian Lek. Exchange at the airport to avoid surge charges at ATMs.</li><li style={{ marginBottom: 0 }}><br></br><b>Spending &amp; currency.</b> The national currency is the Albanian Lek, which can only be exchanged in Albania (airports). Euros are also widely used. Bring some cash for the city centre and local markets; international bank cards work for other expenses.</li></ul></div></div></section>
-          <section className={"pg" + (page === "accommodation" ? " on" : "")}><div className="wrap"><PageHead title="Accommodation" sub="Everything you need for your stay in Albania." /><p className="eyebrow" style={{ marginBottom: 10 }}>Make yourself at home</p><h3>Select Hill Resort</h3><div className="box">We’d recommend staying at Select Hill Resort for our wedding weekend. As part of our wedding package our guests will be granted a 20% discount for their room bookings.<br /><br />Please contact Ife &amp; Niyi directly to secure your rooms. Alternatively you can contact Select Hill Resort directly via WhatsApp on <a href="https://wa.me/355686611111" {...NEWTAB}>+355 68661 1111</a> and quote ‘IfeNiyi2027’ for the discount to be applied.<br /><br />Please secure your booking by <b>1 December 2026</b>.<br /><br /><a className="btn" style={{ marginLeft: 0 }} href="https://selecthill.com/" {...NEWTAB}>Visit Select Hill Resort</a></div><h3>Other stays in Tirana</h3><ul className="linklist"><li><a href="https://www.melia.com/en" {...NEWTAB}>Hotel Elisa Tirana</a></li><li><a href="https://all.accor.com" {...NEWTAB}>Mercure Hotel Tirana</a></li><li><a href="https://royalhill.tiranehotel.com/en/" {...NEWTAB}>Royal Hill Hotel</a></li><li><a href="https://xheko-imperial.com/" {...NEWTAB}>Xheko Imperial Hotel and Spa</a></li><li><a href="https://bianca.al/" {...NEWTAB}>Bianca Hotel and Villa</a></li></ul></div></section>
+          <section className={"pg" + (page === "accommodation" ? " on" : "")}><div className="wrap"><PageHead title="Accommodation" sub="Everything you need for your stay in Albania." /><p className="eyebrow" style={{ marginBottom: 10 }}>Make yourself at home</p><h3>Select Hill Resort</h3><img src="/select-hill.jpg" alt="Aerial view of the pool and terraces at Select Hill Resort, set among the hills of Dajt" style={{ display: "block", width: "100%", height: "auto", margin: "0 0 20px", borderRadius: 14, boxShadow: "0 10px 28px rgba(60, 45, 20, 0.14)" }} loading="lazy" /><div className="box">We’d recommend staying at Select Hill Resort for our wedding weekend. As part of our wedding package our guests will be granted a 20% discount for their room bookings.<br /><br />Please contact Ife &amp; Niyi directly to secure your rooms. Alternatively you can contact Select Hill Resort directly via WhatsApp on <a href="https://wa.me/355686611111" {...NEWTAB}>+355 68661 1111</a> and quote ‘IfeNiyi2027’ for the discount to be applied.<br /><br />Please secure your booking by <b>1 December 2026</b>.<br /><br /><a className="btn" style={{ marginLeft: 0 }} href="https://selecthill.com/" {...NEWTAB}>Visit Select Hill Resort</a></div><h3>Other stays in Tirana</h3><ul className="linklist"><li><a href="https://www.melia.com/en" {...NEWTAB}>Hotel Elisa Tirana</a></li><li><a href="https://all.accor.com" {...NEWTAB}>Mercure Hotel Tirana</a></li><li><a href="https://royalhill.tiranehotel.com/en/" {...NEWTAB}>Royal Hill Hotel</a></li><li><a href="https://xheko-imperial.com/" {...NEWTAB}>Xheko Imperial Hotel and Spa</a></li><li><a href="https://bianca.al/" {...NEWTAB}>Bianca Hotel and Villa</a></li></ul></div></section>
           <section className={"pg" + (page === "registry" ? " on" : "")}><div className="wrap c"><PageHead title="Registry" /><p>Your presence is the greatest gift we could ask for, but if you would like to give a gift, we have created a gift registry to make it easier for you.</p><a className="btn" style={{ margin: "14px 0" }} href={REGISTRY_URL} {...NEWTAB}>Open our gift registry</a><p>Alternatively, a monetary gift can be sent to:</p><div className="box" style={{ display: "inline-block", textAlign: "left" }}>Name: MISS C I AJANI<br />Bank: Nationwide<br />Account number: 03352048<br />Sort code: 07-12-26</div><p style={{ fontFamily: "var(--serif)", fontSize: "1.5rem" }}>Thank you.</p></div></section>
           <section className={"pg" + (page === "qa" ? " on" : "")}><div className="wrap"><PageHead title="Q&A" /><p className="c lead">Got a question? Check here first.</p><details><summary>When is the final RSVP deadline?</summary><p>If you need to change your RSVP response, please do so by 29 January 2027 so we have an accurate headcount.</p></details><details><summary>Can I bring a date?</summary><p>Due to restrictions on numbers, entry is strictly by invitation only.</p></details><details><summary>Are kids welcome?</summary><p>As much as we adore your little ones, they will not be included in the ceremony or reception.</p></details><details><summary>Where should I park?</summary><p>There is plenty of free parking on site.</p></details><details><summary>Are the ceremony and reception venues wheelchair accessible?</summary><p>Yes.</p></details><details><summary>What should I wear?</summary><ul className="attire"><li><b>Friday:</b> All white for the welcome evening.</li><li><b>Saturday:</b> Mediterranean earth tones: champagne, sage, peach, sand, taupe and terracotta.</li></ul></details><details><summary>Is the wedding indoors or outdoors?</summary><p>Weather permitting, the ceremony will be outdoors and the reception indoors.</p></details><details><summary>Can I take pictures during the wedding?</summary><p>Yes! We’d love for you to take photos and share them with us.</p></details><details><summary>Is there a gift registry?</summary><p>Yes, see the <a href="#registry">Registry page</a>. Your presence is the greatest gift we could ask for.</p></details></div></section>
 
