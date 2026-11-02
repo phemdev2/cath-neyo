@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "../lib/supabaseClient";
+
 
 const WEDDING_DATE = new Date("2027-03-27T00:00:00");
 
